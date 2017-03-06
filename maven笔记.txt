@@ -1,0 +1,44 @@
+查看版本：mvn -version
+
+创建Maven项目: mvn archetype:generate
+
+项目打包  mvn package
+
+编译源程序  mvn compile
+ 
+编译并测试  mvn test
+ 
+清空生成的文件  mvn clean
+ 
+将maven项目转化为eclipse项目  mvn eclipse:eclipse
+
+清除有关eclipse项目的配置信息： mvn -Dwtpversion=1.0 eclipse:clean
+
+联合使用  mvn eclipse:clean clean
+
+启动tomcat  mvn tomcat:run
+ 
+启动jetty  mvn jetty:run
+
+groupId : 组织标识，例如：org.codehaus.mojo，在M2_REPO目录下，将是: org/codehaus/mojo目录。
+artifactId : 项目名称，例如：my-project，在M2_REPO目录下，将是：org/codehaus/mojo/my-project目录。
+version : 版本号，例如：1.0，在M2_REPO目录下，将是：org/codehaus/mojo/my-project/1.0目录。
+packaging : 打包的格式，可以为：pom , jar , maven-plugin , ejb , war , ear , rar , par
+
+通过下面命令查看当前pom.xml受到超pom.xml文件的影响：mvn help:effective-pom
+
+安装第三方包  mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc14 -Dversion=10.2.0.3.0 -Dpackaging=jar -Dfile=c:/driver/ojdbc14.jar
+
+运行打包部署，在maven项目目录下：  mvn tomcat:deploy
+
+撤销部署：  mvn tomcat:undeploy
+
+启动web应用：  mvn tomcat:start
+ 
+停止web应用：  mvn tomcat:stop
+ 
+重新部署：  mvn tomcat:redeploy
+ 
+部署展开的war文件：  mvn war:exploded tomcat:exploded
+
+缺省依赖  mvn dependency:tree
