@@ -1,6 +1,24 @@
+http://localhost:8089/ma/init?adminId=0
+http://localhost:8089/ma/getApplying?adminId=0
+http://localhost:8089/ma/cancelClaimed?adminId=0
+http://localhost:8089/ma/giveUp?adminId=0&applyId=0&claimTime=0&displayTime=0&spendTime=0
 
 
 
+mysql:172.16.23.57:3306
+user:finance
+pwd:123456
+各业务根据自己需要创建对应schema
+
+
+
+java -jar mybatis-generator-core-1.3.5.jar -configfile generatorConfig.xml -overwrite
+
+mongodb:172.16.23.57:27017
+user:xinyongjin
+pwd:eGlueW9uZ2ppbgo=
+
+redis:172.16.23.57:6379
 
 
 无锡测试（系统部署）
@@ -85,6 +103,12 @@ redis
 daikuanwang_wuxi_test
 
 
+xinyongjin
+--------------------------------------
+180.101.195.217:5003
+daikuanwang
+ZGFpa3VhbndhbmcK
+
 https://meican.com/login
 
 
@@ -108,3 +132,12 @@ https://meican.com/login
 16.Ctrl + Tab Switcher 导航 与 Ctrl + E 类似效果。
 17.Ctrl + Shift + C 复制当前文件磁盘路径到剪贴板。
 
+http://www.12333sh.gov.cn/wszx/ldjcjb.shtml
+http://bxpy.12333sh.gov.cn/hdpy/Main/Jbjd.aspx
+您的姓名： 韩军营  身份证号： 410782198610242812   
+联系电话： 18217006685   地址：   
+区县： 浦东 						编号： 5979609580 		http://www.12333sh.gov.cn/201412333/hdpy/fk/ny/index.shtml#
+咨询内容： 我去年4月份和北京知达客科技技术有限公司签订劳动合同，被外派到上海建设银行工作。到了去年12月底，建设银行项目结束，公司要我在家（上海）等待安排。中间安排过一次到其他项目的面试，但是没有通过。到了今年1月18号，公司仍没有合适的安排，我就和公司商议提交了离职申请并通过。但是1月份的工资公司至今没发，说是没有考勤没有工资。所以我想咨询一下公司的做法合法吗？ 
+
+浦东新区劳动人事争议仲裁委员会	浦建路1619号（近龙阳路）	68812333转1151、1152	201204	周一至周五9:00-11:30  
+北京知达客信息技术有限公司上海分公司：上海市黄浦区圆明园路149号哈密大厦5楼

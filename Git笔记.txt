@@ -1,9 +1,7 @@
 ¡¶git - ¼òÃ÷Ö¸ÄÏ¡·
 
-´´½¨ĞÂ²Ö¿â
-´´½¨ĞÂÎÄ¼ş¼Ğ£¬´ò¿ª£¬È»ºóÖ´ĞĞ 
-git init
-ÒÔ´´½¨ĞÂµÄ git ²Ö¿â¡£
+´´½¨ĞÂ²Ö¿â£º git init
+
 
 ¼ì³ö²Ö¿â
 Ö´ĞĞÈçÏÂÃüÁîÒÔ´´½¨Ò»¸ö±¾µØ²Ö¿âµÄ¿ËÂ¡°æ±¾£º
@@ -75,14 +73,23 @@ git log --name-status
 ÕâĞ©Ö»ÊÇÄã¿ÉÒÔÊ¹ÓÃµÄ²ÎÊıÖĞºÜĞ¡µÄÒ»²¿·Ö¡£¸ü¶àµÄĞÅÏ¢£¬²Î¿¼£º
 git log --help
 
+
 Ìæ»»±¾µØ¸Ä¶¯
 ¼ÙÈçÄã²Ù×÷Ê§Îó£¨µ±È»£¬Õâ×îºÃÓÀÔ¶²»Òª·¢Éú£©£¬Äã¿ÉÒÔÊ¹ÓÃÈçÏÂÃüÁîÌæ»»µô±¾µØ¸Ä¶¯£º
 git checkout -- <filename>
 ´ËÃüÁî»áÊ¹ÓÃ HEAD ÖĞµÄ×îĞÂÄÚÈİÌæ»»µôÄãµÄ¹¤×÷Ä¿Â¼ÖĞµÄÎÄ¼ş¡£ÒÑÌí¼Óµ½Ôİ´æÇøµÄ¸Ä¶¯ÒÔ¼°ĞÂÎÄ¼ş¶¼²»»áÊÜµ½Ó°Ïì¡£
 
+
+
+
+
+
 ¼ÙÈçÄãÏë¶ªÆúÄãÔÚ±¾µØµÄËùÓĞ¸Ä¶¯ÓëÌá½»£¬¿ÉÒÔµ½·şÎñÆ÷ÉÏ»ñÈ¡×îĞÂµÄ°æ±¾ÀúÊ·£¬²¢½«Äã±¾µØÖ÷·ÖÖ§Ö¸ÏòËü£º
 git fetch origin
 git reset --hard origin/master
+
+
+
 
 ÊµÓÃĞ¡ÌùÊ¿
 ÄÚ½¨µÄÍ¼ĞÎ»¯ git£º
@@ -95,18 +102,24 @@ git config format.pretty oneline
 git add -i
 
 ================================================================================================================
+°²×°Git
 ÔÚLinuxÉÏ°²×°Git : sudo apt-get install git
-
 °²×°Íê³Éºó£¬»¹ĞèÒª×îºóÒ»²½ÉèÖÃ£¬ÔÚÃüÁîĞĞÊäÈë£º
 $ git config --global user.name "Your Name"
 $ git config --global user.email "email@example.com"
-
 ×¢Òâgit configÃüÁîµÄ--global²ÎÊı£¬ÓÃÁËÕâ¸ö²ÎÊı£¬±íÊ¾ÄãÕâÌ¨»úÆ÷ÉÏËùÓĞµÄGit²Ö¿â¶¼»áÊ¹ÓÃÕâ¸öÅäÖÃ£¬µ±È»Ò²¿ÉÒÔ¶ÔÄ³¸ö²Ö¿âÖ¸¶¨²»Í¬µÄÓÃ»§ÃûºÍEmailµØÖ·¡£
 
+
+
+
+
+
+
+
+
+´´½¨°æ±¾¿â
 Í¨¹ıgit initÃüÁî°ÑÕâ¸öÄ¿Â¼±ä³ÉGit¿ÉÒÔ¹ÜÀíµÄ²Ö¿â£º$ git init
-
 ÓÃÃüÁîgit add¸æËßGit£¬°ÑÎÄ¼şÌí¼Óµ½²Ö¿â£º$ git add readme.txt
-
 ÓÃÃüÁîgit commit¸æËßGit£¬°ÑÎÄ¼şÌá½»µ½²Ö¿â£º$ git commit -m "wrote a readme file"
 ¼òµ¥½âÊÍÒ»ÏÂgit commitÃüÁî£¬-mºóÃæÊäÈëµÄÊÇ±¾´ÎÌá½»µÄËµÃ÷£¬¿ÉÒÔÊäÈëÈÎÒâÄÚÈİ£¬µ±È»×îºÃÊÇÓĞÒâÒåµÄ
 ÎªÊ²Ã´GitÌí¼ÓÎÄ¼şĞèÒªadd£¬commitÒ»¹²Á½²½ÄØ£¿ÒòÎªcommit¿ÉÒÔÒ»´ÎÌá½»ºÜ¶àÎÄ¼ş£¬ËùÒÔÄã¿ÉÒÔ¶à´Îadd²»Í¬µÄÎÄ¼ş£¬±ÈÈç£º
@@ -114,27 +127,55 @@ $ git add file1.txt
 $ git add file2.txt file3.txt
 $ git commit -m "add 3 files."
 
+
+
+
+Ê±¹â»ú´©Ëó
 git statusÃüÁî¿ÉÒÔÈÃÎÒÃÇÊ±¿ÌÕÆÎÕ²Ö¿âµ±Ç°µÄ×´Ì¬£¬
-
 ¿´¿´¾ßÌåĞŞ¸ÄÁËÊ²Ã´ÄÚÈİ£º$ git diff readme.txt 
-
 Ìá½»ĞŞ¸ÄºÍÌá½»ĞÂÎÄ¼şÊÇÒ»ÑùµÄÁ½²½£¬µÚÒ»²½ÊÇgit add ; µÚ¶ş²½git commit
+
+
+
+°æ±¾»ØÍË
+git-reset - Reset current HEAD to the specified state
+git reset [<mode>] [<commit>]
+This form resets the current branch head to <commit> and possibly updates the index (resetting it to the tree of <commit>) and the working tree depending on <mode>. If <mode> is omitted, defaults to "--mixed". The <mode> must be one of the following:
+
+--soft
+Does not touch the index file or the working tree at all (but resets the head to <commit>, just like all modes do). This leaves all your changed files "Changes to be committed", as git status would put it.
+
+--mixed
+Resets the index but not the working tree (i.e., the changed files are preserved but not marked for commit) and reports what has not been updated. This is the default action.
+
+If -N is specified, removed paths are marked as intent-to-add (see git-add(1)).
+
+--hard
+Resets the index and working tree. Any changes to tracked files in the working tree since <commit> are discarded.
+
+--merge
+Resets the index and updates the files in the working tree that are different between <commit> and HEAD, but keeps those which are different between the index and working tree (i.e. which have changes which have not been added). If a file that is different between <commit> and the index has unstaged changes, reset is aborted.
+
+In other words, --merge does something like a git read-tree -u -m <commit>, but carries forward unmerged index entries.
+
+--keep
+Resets index entries and updates files in the working tree that are different between <commit> and HEAD. If a file that is different between <commit> and HEAD has local changes, reset is aborted.
 
 ÓÃgit logÃüÁî²é¿´ÀúÊ·¼ÇÂ¼£º$ git log
 »ò $ git log --pretty=oneline
-
 ÔÚGitÖĞ£¬ÓÃHEAD±íÊ¾µ±Ç°°æ±¾£¬ÉÏÒ»¸ö°æ±¾¾ÍÊÇHEAD^£¬ÉÏÉÏÒ»¸ö°æ±¾¾ÍÊÇHEAD^^£¬µ±È»ÍùÉÏ100¸ö°æ±¾Ğ´100¸ö^±È½ÏÈİÒ×Êı²»¹ıÀ´£¬ËùÒÔĞ´³ÉHEAD~100¡£
-
 °Ñµ±Ç°°æ±¾»ØÍËµ½ÉÏÒ»¸ö°æ±¾¿ÉÒÔÊ¹ÓÃgit resetÃüÁî£º$ git reset --hard HEAD^
 $ git reset --hard 3628164
-
 ÔÚGitÖĞ£¬×ÜÊÇÓĞºó»ÚÒ©¿ÉÒÔ³ÔµÄ¡£µ±ÄãÓÃ$ git reset --hard HEAD^»ØÍËµ½add distributed°æ±¾Ê±£¬ÔÙÏë»Ö¸´µ½append GPL£¬¾Í±ØĞëÕÒµ½append GPLµÄcommit id¡£
 GitÌá¹©ÁËÒ»¸öÃüÁîgit reflogÓÃÀ´¼ÇÂ¼ÄãµÄÃ¿Ò»´ÎÃüÁî£º$ git reflog
 
+
+
+
+¹¤×÷ÇøºÍÔİ´æÇø
 HEADÖ¸ÏòµÄ°æ±¾¾ÍÊÇµ±Ç°°æ±¾£¬Òò´Ë£¬GitÔÊĞíÎÒÃÇÔÚ°æ±¾µÄÀúÊ·Ö®¼ä´©Ëó£¬Ê¹ÓÃÃüÁîgit reset --hard commit_id¡£
 ´©ËóÇ°£¬ÓÃgit log¿ÉÒÔ²é¿´Ìá½»ÀúÊ·£¬ÒÔ±ãÈ·¶¨Òª»ØÍËµ½ÄÄ¸ö°æ±¾¡£
 ÒªÖØ·µÎ´À´£¬ÓÃgit reflog²é¿´ÃüÁîÀúÊ·£¬ÒÔ±ãÈ·¶¨Òª»Øµ½Î´À´µÄÄÄ¸ö°æ±¾¡£
-
 ¹¤×÷Çø£¨Working Directory£©¾ÍÊÇÄãÔÚµçÄÔÀïÄÜ¿´µ½µÄÄ¿Â¼£¬
 °æ±¾¿â£¨Repository£©¹¤×÷ÇøÓĞÒ»¸öÒş²ØÄ¿Â¼.git£¬Õâ¸ö²»Ëã¹¤×÷Çø£¬¶øÊÇGitµÄ°æ±¾¿â¡£
 GitµÄ°æ±¾¿âÀï´æÁËºÜ¶à¶«Î÷£¬ÆäÖĞ×îÖØÒªµÄ¾ÍÊÇ³ÆÎªstage£¨»òÕß½Ğindex£©µÄÔİ´æÇø£¬»¹ÓĞGitÎªÎÒÃÇ×Ô¶¯´´½¨µÄµÚÒ»¸ö·ÖÖ§master£¬ÒÔ¼°Ö¸ÏòmasterµÄÒ»¸öÖ¸Õë½ĞHEAD¡£
@@ -146,6 +187,10 @@ GitµÄ°æ±¾¿âÀï´æÁËºÜ¶à¶«Î÷£¬ÆäÖĞ×îÖØÒªµÄ¾ÍÊÇ³ÆÎªstage£¨»òÕß½Ğindex£©µÄÔİ´æÇø£¬»¹Ó
 ËùÒÔ£¬git addÃüÁîÊµ¼ÊÉÏ¾ÍÊÇ°ÑÒªÌá½»µÄËùÓĞĞŞ¸Ä·Åµ½Ôİ´æÇø£¨Stage£©£¬È»ºó£¬Ö´ĞĞgit commit¾Í¿ÉÒÔÒ»´ÎĞÔ°ÑÔİ´æÇøµÄËùÓĞĞŞ¸ÄÌá½»µ½·ÖÖ§¡£
 Ò»µ©Ìá½»ºó£¬Èç¹ûÄãÓÖÃ»ÓĞ¶Ô¹¤×÷Çø×öÈÎºÎĞŞ¸Ä£¬ÄÇÃ´¹¤×÷Çø¾ÍÊÇ¡°¸É¾»¡±µÄ£º
 
+
+
+
+³·ÏúĞŞ¸Ä¡¢·ÅÆúĞŞ¸Ä
 Git»á¸æËßÄã£¬git checkout -- file¿ÉÒÔ¶ªÆú¹¤×÷ÇøµÄĞŞ¸Ä£º
 $ git checkout -- readme.txt
 ÃüÁîgit checkout -- readme.txtÒâË¼¾ÍÊÇ£¬°Ñreadme.txtÎÄ¼şÔÚ¹¤×÷ÇøµÄĞŞ¸ÄÈ«²¿³·Ïú£¬ÕâÀïÓĞÁ½ÖÖÇé¿ö£º
@@ -153,6 +198,12 @@ $ git checkout -- readme.txt
 Ò»ÖÖÊÇreadme.txtÒÑ¾­Ìí¼Óµ½Ôİ´æÇøºó£¬ÓÖ×÷ÁËĞŞ¸Ä£¬ÏÖÔÚ£¬³·ÏúĞŞ¸Ä¾Í»Øµ½Ìí¼Óµ½Ôİ´æÇøºóµÄ×´Ì¬¡£
 ×ÜÖ®£¬¾ÍÊÇÈÃÕâ¸öÎÄ¼ş»Øµ½×î½üÒ»´Îgit commit»ògit addÊ±µÄ×´Ì¬¡£
 git checkout -- fileÃüÁîÖĞµÄ--ºÜÖØÒª£¬Ã»ÓĞ--£¬¾Í±ä³ÉÁË¡°ÇĞ»»µ½ÁíÒ»¸ö·ÖÖ§¡±µÄÃüÁî£¬
+
+
+
+
+
+
 
 GitÍ¬Ñù¸æËßÎÒÃÇ£¬ÓÃÃüÁîgit reset HEAD file¿ÉÒÔ°ÑÔİ´æÇøµÄĞŞ¸Ä³·Ïúµô£¨unstage£©£¬ÖØĞÂ·Å»Ø¹¤×÷Çø£º
 $ git reset HEAD readme.txt
@@ -172,31 +223,25 @@ $ git checkout -- test.txt
 
 ÃüÁîgit rmÓÃÓÚÉ¾³ıÒ»¸öÎÄ¼ş¡£Èç¹ûÒ»¸öÎÄ¼şÒÑ¾­±»Ìá½»µ½°æ±¾¿â£¬ÄÇÃ´ÄãÓÀÔ¶²»ÓÃµ£ĞÄÎóÉ¾£¬µ«ÊÇÒªĞ¡ĞÄ£¬ÄãÖ»ÄÜ»Ö¸´ÎÄ¼şµ½×îĞÂ°æ±¾£¬Äã»á¶ªÊ§×î½üÒ»´ÎÌá½»ºóÄãĞŞ¸ÄµÄÄÚÈİ¡£
 
+
+
+
+
+Ô¶³Ì²Ö¿â
 GitÊÇ·Ö²¼Ê½°æ±¾¿ØÖÆÏµÍ³£¬Í¬Ò»¸öGit²Ö¿â£¬¿ÉÒÔ·Ö²¼µ½²»Í¬µÄ»úÆ÷ÉÏ¡£ÔõÃ´·Ö²¼ÄØ£¿×îÔç£¬¿Ï¶¨Ö»ÓĞÒ»Ì¨»úÆ÷ÓĞÒ»¸öÔ­Ê¼°æ±¾¿â£¬´Ëºó£¬±ğµÄ»úÆ÷¿ÉÒÔ¡°¿ËÂ¡¡±Õâ¸öÔ­Ê¼°æ±¾¿â£¬¶øÇÒÃ¿Ì¨»úÆ÷µÄ°æ±¾¿âÆäÊµ¶¼ÊÇÒ»ÑùµÄ£¬²¢Ã»ÓĞÖ÷´ÎÖ®·Ö¡£
 ×¢²áGitHubÕËºÅ¡£ÓÉÓÚÄãµÄ±¾µØGit²Ö¿âºÍGitHub²Ö¿âÖ®¼äµÄ´«ÊäÊÇÍ¨¹ıSSH¼ÓÃÜµÄ£¬ËùÒÔ£¬ĞèÒªÒ»µãÉèÖÃ£º
-
 µÚ1²½£º´´½¨SSH Key¡£ÔÚÓÃ»§Ö÷Ä¿Â¼ÏÂ£¬¿´¿´ÓĞÃ»ÓĞ.sshÄ¿Â¼£¬Èç¹ûÓĞ£¬ÔÙ¿´¿´Õâ¸öÄ¿Â¼ÏÂÓĞÃ»ÓĞid_rsaºÍid_rsa.pubÕâÁ½¸öÎÄ¼ş£¬Èç¹ûÒÑ¾­ÓĞÁË£¬¿ÉÖ±½ÓÌøµ½ÏÂÒ»²½¡£Èç¹ûÃ»ÓĞ£¬´ò¿ªShell£¨WindowsÏÂ´ò¿ªGit Bash£©£¬´´½¨SSH Key£º
-
 $ ssh-keygen -t rsa -C "youremail@example.com"
 ÄãĞèÒª°ÑÓÊ¼şµØÖ·»»³ÉÄã×Ô¼ºµÄÓÊ¼şµØÖ·£¬È»ºóÒ»Â·»Ø³µ£¬Ê¹ÓÃÄ¬ÈÏÖµ¼´¿É£¬ÓÉÓÚÕâ¸öKeyÒ²²»ÊÇÓÃÓÚ¾üÊÂÄ¿µÄ£¬ËùÒÔÒ²ÎŞĞèÉèÖÃÃÜÂë¡£
-
 Èç¹ûÒ»ÇĞË³ÀûµÄ»°£¬¿ÉÒÔÔÚÓÃ»§Ö÷Ä¿Â¼ÀïÕÒµ½.sshÄ¿Â¼£¬ÀïÃæÓĞid_rsaºÍid_rsa.pubÁ½¸öÎÄ¼ş£¬ÕâÁ½¸ö¾ÍÊÇSSH KeyµÄÃØÔ¿¶Ô£¬id_rsaÊÇË½Ô¿£¬²»ÄÜĞ¹Â¶³öÈ¥£¬id_rsa.pubÊÇ¹«Ô¿£¬¿ÉÒÔ·ÅĞÄµØ¸æËßÈÎºÎÈË¡£
-
 µÚ2²½£ºµÇÂ½GitHub£¬´ò¿ª¡°Account settings¡±£¬¡°SSH Keys¡±Ò³Ãæ£º
-
 È»ºó£¬µã¡°Add SSH Key¡±£¬ÌîÉÏÈÎÒâTitle£¬ÔÚKeyÎÄ±¾¿òÀïÕ³Ìùid_rsa.pubÎÄ¼şµÄÄÚÈİ£º
 ÎªÊ²Ã´GitHubĞèÒªSSH KeyÄØ£¿ÒòÎªGitHubĞèÒªÊ¶±ğ³öÄãÍÆËÍµÄÌá½»È·ÊµÊÇÄãÍÆËÍµÄ£¬¶ø²»ÊÇ±ğÈËÃ°³äµÄ£¬¶øGitÖ§³ÖSSHĞ­Òé£¬ËùÒÔ£¬GitHubÖ»ÒªÖªµÀÁËÄãµÄ¹«Ô¿£¬¾Í¿ÉÒÔÈ·ÈÏÖ»ÓĞÄã×Ô¼º²ÅÄÜÍÆËÍ¡£
-
 µ±È»£¬GitHubÔÊĞíÄãÌí¼Ó¶à¸öKey¡£¼Ù¶¨ÄãÓĞÈô¸ÉµçÄÔ£¬ÄãÒ»»á¶ùÔÚ¹«Ë¾Ìá½»£¬Ò»»á¶ùÔÚ¼ÒÀïÌá½»£¬Ö»Òª°ÑÃ¿Ì¨µçÄÔµÄKey¶¼Ìí¼Óµ½GitHub£¬¾Í¿ÉÒÔÔÚÃ¿Ì¨µçÄÔÉÏÍùGitHubÍÆËÍÁË¡£
-
 ×îºóÓÑÇéÌáÊ¾£¬ÔÚGitHubÉÏÃâ·ÑÍĞ¹ÜµÄGit²Ö¿â£¬ÈÎºÎÈË¶¼¿ÉÒÔ¿´µ½à¸£¨µ«Ö»ÓĞÄã×Ô¼º²ÅÄÜ¸Ä£©¡£ËùÒÔ£¬²»Òª°ÑÃô¸ĞĞÅÏ¢·Å½øÈ¥¡£
-
 ÏÖÔÚµÄÇé¾°ÊÇ£¬ÄãÒÑ¾­ÔÚ±¾µØ´´½¨ÁËÒ»¸öGit²Ö¿âºó£¬ÓÖÏëÔÚGitHub´´½¨Ò»¸öGit²Ö¿â£¬²¢ÇÒÈÃÕâÁ½¸ö²Ö¿â½øĞĞÔ¶³ÌÍ¬²½£¬ÕâÑù£¬GitHubÉÏµÄ²Ö¿â¼È¿ÉÒÔ×÷Îª±¸·İ£¬ÓÖ¿ÉÒÔÈÃÆäËûÈËÍ¨¹ı¸Ã²Ö¿âÀ´Ğ­×÷£¬ÕæÊÇÒ»¾Ù¶àµÃ¡£
-
 Ê×ÏÈ£¬µÇÂ½GitHub£¬È»ºó£¬ÔÚÓÒÉÏ½ÇÕÒµ½¡°Create a new repo¡±°´Å¥£¬´´½¨Ò»¸öĞÂµÄ²Ö¿â£º
-
 ÔÚRepository nameÌîÈëlearngit£¬ÆäËû±£³ÖÄ¬ÈÏÉèÖÃ£¬µã»÷¡°Create repository¡±°´Å¥£¬¾Í³É¹¦µØ´´½¨ÁËÒ»¸öĞÂµÄGit²Ö¿â£º
-
 Ä¿Ç°£¬ÔÚGitHubÉÏµÄÕâ¸ölearngit²Ö¿â»¹ÊÇ¿ÕµÄ£¬GitHub¸æËßÎÒÃÇ£¬¿ÉÒÔ´ÓÕâ¸ö²Ö¿â¿ËÂ¡³öĞÂµÄ²Ö¿â£¬Ò²¿ÉÒÔ°ÑÒ»¸öÒÑÓĞµÄ±¾µØ²Ö¿âÓëÖ®¹ØÁª£¬È»ºó£¬°Ñ±¾µØ²Ö¿âµÄÄÚÈİÍÆËÍµ½GitHub²Ö¿â¡£
 
 ÏÖÔÚ£¬ÎÒÃÇ¸ù¾İGitHubµÄÌáÊ¾£¬ÔÚ±¾µØµÄlearngit²Ö¿âÏÂÔËĞĞÃüÁî£º
@@ -208,6 +253,7 @@ $ git remote add origin git@github.com:michaelliao/learngit.git
 ÏÂÒ»²½£¬¾Í¿ÉÒÔ°Ñ±¾µØ¿âµÄËùÓĞÄÚÈİÍÆËÍµ½Ô¶³Ì¿âÉÏ£º
 
 $ git push -u origin master
+(-u »ò --set-upstream)
 
 °Ñ±¾µØ¿âµÄÄÚÈİÍÆËÍµ½Ô¶³Ì£¬ÓÃgit pushÃüÁî£¬Êµ¼ÊÉÏÊÇ°Ñµ±Ç°·ÖÖ§masterÍÆËÍµ½Ô¶³Ì¡£
 
@@ -442,29 +488,19 @@ $ git stash apply stash@{0}
 
 Feature·ÖÖ§
 Èí¼ş¿ª·¢ÖĞ£¬×ÜÓĞÎŞÇîÎŞ¾¡µÄĞÂµÄ¹¦ÄÜÒª²»¶ÏÌí¼Ó½øÀ´¡£
-
 Ìí¼ÓÒ»¸öĞÂ¹¦ÄÜÊ±£¬Äã¿Ï¶¨²»Ï£ÍûÒòÎªÒ»Ğ©ÊµÑéĞÔÖÊµÄ´úÂë£¬°ÑÖ÷·ÖÖ§¸ãÂÒÁË£¬ËùÒÔ£¬Ã¿Ìí¼ÓÒ»¸öĞÂ¹¦ÄÜ£¬×îºÃĞÂ½¨Ò»¸öfeature·ÖÖ§£¬ÔÚÉÏÃæ¿ª·¢£¬Íê³Éºó£¬ºÏ²¢£¬×îºó£¬É¾³ı¸Ãfeature·ÖÖ§¡£
-
 ÏÖÔÚ£¬ÄãÖÕÓÚ½Óµ½ÁËÒ»¸öĞÂÈÎÎñ£º¿ª·¢´úºÅÎªVulcanµÄĞÂ¹¦ÄÜ£¬¸Ã¹¦ÄÜ¼Æ»®ÓÃÓÚÏÂÒ»´úĞÇ¼Ê·É´¬¡£
-
 ÓÚÊÇ×¼±¸¿ª·¢£º
-
 $ git checkout -b feature-vulcan
 5·ÖÖÓºó£¬¿ª·¢Íê±Ï£º
-
 $ git add vulcan.py
 $ git status
 $ git commit -m "add feature vulcan"
-
 ÇĞ»Ødev£¬×¼±¸ºÏ²¢£º
-
 $ git checkout dev
 Ò»ÇĞË³ÀûµÄ»°£¬feature·ÖÖ§ºÍbug·ÖÖ§ÊÇÀàËÆµÄ£¬ºÏ²¢£¬È»ºóÉ¾³ı¡£
-
 µ«ÊÇ£¬¾ÍÔÚ´ËÊ±£¬½Óµ½ÉÏ¼¶ÃüÁî£¬Òò¾­·Ñ²»×ã£¬ĞÂ¹¦ÄÜ±ØĞëÈ¡Ïû£¡
-
 ËäÈ»°×¸ÉÁË£¬µ«ÊÇÕâ¸ö·ÖÖ§»¹ÊÇ±ØĞë¾ÍµØÏú»Ù£º
-
 $ git branch -d feature-vulcan
 error: The branch 'feature-vulcan' is not fully merged.
 If you are sure you want to delete it, run 'git branch -D feature-vulcan'.
@@ -504,6 +540,7 @@ origin  git@github.com:michaelliao/learngit.git (fetch)
 origin  git@github.com:michaelliao/learngit.git (push)
 ÉÏÃæÏÔÊ¾ÁË¿ÉÒÔ×¥È¡ºÍÍÆËÍµÄoriginµÄµØÖ·¡£Èç¹ûÃ»ÓĞÍÆËÍÈ¨ÏŞ£¬¾Í¿´²»µ½pushµÄµØÖ·¡£
 
+
 ÍÆËÍ·ÖÖ§
 ÍÆËÍ·ÖÖ§£¬¾ÍÊÇ°Ñ¸Ã·ÖÖ§ÉÏµÄËùÓĞ±¾µØÌá½»ÍÆËÍµ½Ô¶³Ì¿â¡£ÍÆËÍÊ±£¬ÒªÖ¸¶¨±¾µØ·ÖÖ§£¬ÕâÑù£¬Git¾Í»á°Ñ¸Ã·ÖÖ§ÍÆËÍµ½Ô¶³Ì¿â¶ÔÓ¦µÄÔ¶³Ì·ÖÖ§ÉÏ£º
 $ git push origin master
@@ -514,6 +551,8 @@ dev·ÖÖ§ÊÇ¿ª·¢·ÖÖ§£¬ÍÅ¶ÓËùÓĞ³ÉÔ±¶¼ĞèÒªÔÚÉÏÃæ¹¤×÷£¬ËùÒÔÒ²ĞèÒªÓëÔ¶³ÌÍ¬²½£»
 bug·ÖÖ§Ö»ÓÃÓÚÔÚ±¾µØĞŞ¸´bug£¬¾ÍÃ»±ØÒªÍÆµ½Ô¶³ÌÁË£¬³ı·ÇÀÏ°åÒª¿´¿´ÄãÃ¿ÖÜµ½µ×ĞŞ¸´ÁË¼¸¸öbug£»
 feature·ÖÖ§ÊÇ·ñÍÆµ½Ô¶³Ì£¬È¡¾öÓÚÄãÊÇ·ñºÍÄãµÄĞ¡»ï°éºÏ×÷ÔÚÉÏÃæ¿ª·¢¡£
 ×ÜÖ®£¬¾ÍÊÇÔÚGitÖĞ£¬·ÖÖ§ÍêÈ«¿ÉÒÔÔÚ±¾µØ×Ô¼º²Ø×ÅÍæ£¬ÊÇ·ñÍÆËÍ£¬ÊÓÄãµÄĞÄÇé¶ø¶¨£¡
+
+
 
 ×¥È¡·ÖÖ§
 ¶àÈËĞ­×÷Ê±£¬´ó¼Ò¶¼»áÍùmasterºÍdev·ÖÖ§ÉÏÍÆËÍ¸÷×ÔµÄĞŞ¸Ä¡£
@@ -764,11 +803,17 @@ $ git check-ignore -v App.class
 .gitignore:3:*.class    App.class
 Git»á¸æËßÎÒÃÇ£¬.gitignoreµÄµÚ3ĞĞ¹æÔòºöÂÔÁË¸ÃÎÄ¼ş£¬ÓÚÊÇÎÒÃÇ¾Í¿ÉÒÔÖªµÀÓ¦¸ÃĞŞ¶©ÄÄ¸ö¹æÔò¡£
 
-Ğ¡½á
-
 ºöÂÔÄ³Ğ©ÎÄ¼şÊ±£¬ĞèÒª±àĞ´.gitignore£»
-
 .gitignoreÎÄ¼ş±¾ÉíÒª·Åµ½°æ±¾¿âÀï£¬²¢ÇÒ¿ÉÒÔ¶Ô.gitignore×ö°æ±¾¹ÜÀí£¡
+
+
+
+
+
+
+
+
+
 
 ´î½¨Git·şÎñÆ÷
 µÚÒ»²½£¬°²×°git£º
@@ -905,26 +950,45 @@ $ git checkout dev
 É¾³ı·ÖÖ§£ºgit branch -d <name>
 Ç¿ĞĞÉ¾³ı£º$ git branch -D <name>
 
-ÓÃ´ø²ÎÊıµÄgit logÒ²¿ÉÒÔ¿´µ½·ÖÖ§µÄºÏ²¢Çé¿ö£º
 
+
+
+
+
+
+
+
+
+
+ÓÃ´ø²ÎÊıµÄgit logÒ²¿ÉÒÔ¿´µ½·ÖÖ§µÄºÏ²¢Çé¿ö£º
 $ git log --graph --pretty=oneline --abbrev-commit
 $ git log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-
-
 ÓÃgit log --graphÃüÁî¿ÉÒÔ¿´µ½·ÖÖ§ºÏ²¢Í¼¡£
-
 ÊµÕ½Ò»ÏÂ--no-ff·½Ê½µÄgit merge£º$ git merge --no-ff -m "merge with no-ff" dev
 
+
+
+
+
+
+
+
+
+
+
+
 Git»¹Ìá¹©ÁËÒ»¸östash¹¦ÄÜ£¬¿ÉÒÔ°Ñµ±Ç°¹¤×÷ÏÖ³¡¡°´¢²Ø¡±ÆğÀ´£¬µÈÒÔºó»Ö¸´ÏÖ³¡ºó¼ÌĞø¹¤×÷£º$ git stash
-
 ¸Õ²ÅµÄ¹¤×÷ÏÖ³¡´æµ½ÄÄÈ¥ÁË£¿ÓÃgit stash listÃüÁî¿´¿´£º$ git stash list
-
 Git°ÑstashÄÚÈİ´æÔÚÄ³¸öµØ·½ÁË£¬µ«ÊÇĞèÒª»Ö¸´Ò»ÏÂ£¬ÓĞÁ½¸ö°ì·¨£º
 Ò»ÊÇÓÃgit stash apply»Ö¸´£¬µ«ÊÇ»Ö¸´ºó£¬stashÄÚÈİ²¢²»É¾³ı£¬ÄãĞèÒªÓÃgit stash dropÀ´É¾³ı£»
 ÁíÒ»ÖÖ·½Ê½ÊÇÓÃgit stash pop£¬»Ö¸´µÄÍ¬Ê±°ÑstashÄÚÈİÒ²É¾ÁË£º
 $ git stash pop
-
 Äã¿ÉÒÔ¶à´Îstash£¬»Ö¸´µÄÊ±ºò£¬ÏÈÓÃgit stash list²é¿´£¬È»ºó»Ö¸´Ö¸¶¨µÄstash£¬ÓÃÃüÁî£º$ git stash apply stash@{0}
+
+
+
+
+
 
 Òª²é¿´Ô¶³Ì¿âµÄĞÅÏ¢£¬ÓÃgit remote£º$ git remote
 ÓÃgit remote -vÏÔÊ¾¸üÏêÏ¸µÄĞÅÏ¢£º$ git remote -v

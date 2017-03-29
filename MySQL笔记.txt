@@ -1,751 +1,2405 @@
-MySQLִ��˳��
-1��FORM: ��FROM����ߵı����ұߵı�����ѿ��������������VT1
-2��ON: �����VT1����ONɸѡ��ֻ����Щ����<join-condition>���вŻᱻ��¼�����VT2�С�
-3��JOIN�� ���ָ����OUTER JOIN������left join�� right join������ô��������δƥ����оͻ���Ϊ�ⲿ�����ӵ������VT2�У����������VT3, rug from�Ӿ��а����������ϵı��Ļ�����ô�ͻ����һ��join���Ӳ����Ľ��VT3����һ�����ظ�ִ�в���1~3���������裬һֱ�����������еı�Ϊֹ��
-4��WHERE�� �������VT3����WHERE�������ˡ�ֻ�з���<where-condition>�ļ�¼�Żᱻ���뵽�����VT4�С�
-5��GROUP BY: ����group by�Ӿ��е��У���VT4�еļ�¼���з������������VT5.
-6��CUBE | ROLLUP: �Ա�VT5����cube����rollup������������VT6.
-7��HAVING�� �������VT6Ӧ��having���ˣ�ֻ�з���<having-condition>�ļ�¼�Żᱻ ���뵽�����VT7�С�
-8��SELECT�� ִ��select������ѡ��ָ�����У����뵽�����VT8�С�
-9��DISTINCT�� ��VT8�еļ�¼����ȥ�ء����������VT9.
-10��ORDER BY: �������VT9�еļ�¼����<order_by_list>����������������������VT10.
-11��LIMIT��ȡ��ָ���еļ�¼�����������VT11, ����������ء�
+﻿MySQL执行顺序
+1，FORM: 对FROM的左边的表和右边的表计算笛卡尔积。产生虚表VT1
+2，ON: 对虚表VT1进行ON筛选，只有那些符合<join-condition>的行才会被记录在虚表VT2中。
+3，JOIN： 如果指定了OUTER JOIN（比如left join、 right join），那么保留表中未匹配的行就会作为外部行添加到虚拟表VT2中，产生虚拟表VT3, rug from子句中包含两个以上的表的话，那么就会对上一个join连接产生的结果VT3和下一个表重复执行步骤1~3这三个步骤，一直到处理完所有的表为止。
+4，WHERE： 对虚拟表VT3进行WHERE条件过滤。只有符合<where-condition>的记录才会被插入到虚拟表VT4中。
+5，GROUP BY: 根据group by子句中的列，对VT4中的记录进行分组操作，产生VT5.
+6，CUBE | ROLLUP: 对表VT5进行cube或者rollup操作，产生表VT6.
+7，HAVING： 对虚拟表VT6应用having过滤，只有符合<having-condition>的记录才会被 插入到虚拟表VT7中。
+8，SELECT： 执行select操作，选择指定的列，插入到虚拟表VT8中。
+9，DISTINCT： 对VT8中的记录进行去重。产生虚拟表VT9.
+10，ORDER BY: 将虚拟表VT9中的记录按照<order_by_list>进行排序操作，产生虚拟表VT10.
+11，LIMIT：取出指定行的记录，产生虚拟表VT11, 并将结果返回。
 
+
+查询注释：
+SELECT
+    COLUMN_NAME,
+    column_comment
+FROM
+    INFORMATION_SCHEMA.Columns
+WHERE
+    table_name='a_user_product_audit'
+AND table_schema='ma';
 
 
 update q_questionnaire_manual set release_at=now() where release_at is null;
 
 alter table q_questionnaire_manual modify column release_at timestamp not NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'release time from redis';
 
-alter table ���� modify column �ֶ��� ����;
-����
+alter table 表名 modify column 字段名 类型;
+例如
 MySQL> alter table address modify column city char(30);
-�޸����Ϳ����ã������޸����ͣ����ܻᵼ��ԭ�����ݳ�����
-�޸ĳ��ȿ����ã��޸ĳ��ȣ�Ҫ��֤�������������ݣ��Ա�֤ԭ�����ݲ�������
+修改类型可以用（谨慎修改类型，可能会导致原有数据出错）
+修改长度可以用（修改长度，要保证不短与已有数据，以保证原有数据不出错）
 mysql> alter table address modify column city varchar(50);
 
-������
+索引：
 
 ALTER TABLE `q_questionnaire_manual` ADD INDEX `idx_name` (`status`, `release_at`) ;
 
-������
-1���ַ�������
+函数：
+1、字符串函数
 ascii(str)   
-�����ַ���str�ĵ�һ���ַ���asciiֵ(str�ǿմ�ʱ����0)  
+返回字符串str的第一个字符的ascii值(str是空串时返回0)  
 mysql> select ascii('2');  
-����-> 50  
+　　-> 50  
 mysql> select ascii(2);  
-����-> 50  
+　　-> 50  
 mysql> select ascii('dete');  
-����-> 100 
+　　-> 100 
 
  
 ord(str)   
-����ַ���str�����ǵ��ֽڷ�����ascii()�������ص���ֵͬ��
+如果字符串str句首是单字节返回与ascii()函数返回的相同值。
  
-�����һ�����ֽ��ַ�,�Ը�ʽ����((first byte ascii code)*256+(second byte ascii code))[*256+third byte asciicode...]  
+如果是一个多字节字符,以格式返回((first byte ascii code)*256+(second byte ascii code))[*256+third byte asciicode...]  
 mysql> select ord('2');  
-����-> 50  
+　　-> 50  
    
 conv(n,from_base,to_base)   
-������n����ת��,��ת��Ϊ�ִ�����(�κβ���Ϊnullʱ����null,���Ʒ�ΧΪ2-36����,��to_base�Ǹ���ʱn��Ϊ�з������������޷�����,conv��64λ�㾫�ȹ���)  
+对数字n进制转换,并转换为字串返回(任何参数为null时返回null,进制范围为2-36进制,当to_base是负数时n作为有符号数否则作无符号数,conv以64位点精度工作)  
 mysql> select conv("a",16,2);  
-����-> '1010' 
+　　-> '1010' 
 mysql> select conv("6e",18,8);  
-����-> '172' 
+　　-> '172' 
 mysql> select conv(-17,10,-18);  
-����-> '-h' 
+　　-> '-h' 
 mysql> select conv(10+"10"+'10'+0xa,10,10);  
-����-> '40' 
+　　-> '40' 
    
 bin(n)   
-��nתΪ������ֵ�����ִ�����(n��bigint����,�ȼ���conv(n,10,2))  
+把n转为二进制值并以字串返回(n是bigint数字,等价于conv(n,10,2))  
 mysql> select bin(12);  
-����-> '1100' 
+　　-> '1100' 
  
 oct(n)   
-��nתΪ�˽���ֵ�����ִ�����(n��bigint����,�ȼ���conv(n,10,8))  
+把n转为八进制值并以字串返回(n是bigint数字,等价于conv(n,10,8))  
 mysql> select oct(12);  
-����-> '14' 
+　　-> '14' 
    
 hex(n)   
-��nתΪʮ�����Ʋ����ִ�����(n��bigint����,�ȼ���conv(n,10,16))  
+把n转为十六进制并以字串返回(n是bigint数字,等价于conv(n,10,16))  
 mysql> select hex(255);  
-����-> 'ff' 
+　　-> 'ff' 
    
 char(n,...)   
-�����ɲ���n,...��Ӧ��ascii�����ַ���ɵ�һ���ִ�(������n,...����������,nullֵ������)   
+返回由参数n,...对应的ascii代码字符组成的一个字串(参数是n,...是数字序列,null值被跳过)   
 mysql> select char(77,121,83,81,'76');  
-����-> 'mysql' 
+　　-> 'mysql' 
 mysql> select char(77,77.3,'77.3');  
-����-> 'mmm' 
+　　-> 'mmm' 
    
 concat(str1,str2,...)   
-�Ѳ�������һ�����ַ���������(�κβ�����nullʱ����null)  
+把参数连成一个长字符串并返回(任何参数是null时返回null)  
 mysql> select concat('my', 's', 'ql');  
-����-> 'mysql' 
+　　-> 'mysql' 
 mysql> select concat('my', null, 'ql');  
-����-> null 
+　　-> null 
 mysql> select concat(14.3);  
-����-> '14.3' 
+　　-> '14.3' 
  
 length(str)   
 octet_length(str)  
 char_length(str)  
 character_length(str)  
-�����ַ���str�ĳ���(���ڶ��ֽ��ַ�char_length������һ��)
+返回字符串str的长度(对于多字节字符char_length仅计算一次)
 mysql> select length('text');  
-����-> 4  
+　　-> 4  
 mysql> select octet_length('text');  
-����-> 4  
+　　-> 4  
  
 locate(substr,str)   
 position(substr in str)   
-�����ַ���substr���ַ���str��һ�γ��ֵ�λ��(str������substrʱ����0)  
+返回字符串substr在字符串str第一次出现的位置(str不包含substr时返回0)  
 mysql> select locate('bar', 'foobarbar');  
-����-> 4  
+　　-> 4  
 mysql> select locate('xbar', 'foobar');  
-����-> 0  
+　　-> 0  
     
 locate(substr,str,pos)  
-�����ַ���substr���ַ���str�ĵ�pos��λ�����һ�γ��ֵ�λ��(str������substrʱ����0)  
+返回字符串substr在字符串str的第pos个位置起第一次出现的位置(str不包含substr时返回0)  
 mysql> select locate('bar', 'foobarbar',5);  
-����-> 7  
+　　-> 7  
  
 instr(str,substr)   
-�����ַ���substr���ַ���str��һ�γ��ֵ�λ��(str������substrʱ����0)  
+返回字符串substr在字符串str第一次出现的位置(str不包含substr时返回0)  
 mysql> select instr('foobarbar', 'bar');  
-����-> 4  
+　　-> 4  
 mysql> select instr('xbar', 'foobar');  
-����-> 0   
+　　-> 0   
  
 lpad(str,len,padstr)   
-���ַ���padstr�str���ֱ���ִ�����Ϊlen������  
+用字符串padstr填补str左端直到字串长度为len并返回  
 mysql> select lpad('hi',4,'??');  
-����-> '??hi' 
+　　-> '??hi' 
    
 rpad(str,len,padstr)   
-���ַ���padstr�str�Ҷ�ֱ���ִ�����Ϊlen������  
+用字符串padstr填补str右端直到字串长度为len并返回  
 mysql> select rpad('hi',5,'?');  
-����-> 'hi???' 
+　　-> 'hi???' 
  
 left(str,len)   
-�����ַ���str�����len���ַ�  
+返回字符串str的左端len个字符  
 mysql> select left('foobarbar', 5);  
-����-> 'fooba' 
+　　-> 'fooba' 
  
 right(str,len)   
-�����ַ���str���Ҷ�len���ַ�   
+返回字符串str的右端len个字符   
 mysql> select right('foobarbar', 4);  
-����-> 'rbar' 
+　　-> 'rbar' 
  
 substring(str,pos,len)   
 substring(str from pos for len)   
 mid(str,pos,len)   
-�����ַ���str��λ��pos��len���ַ�mysql> select substring('quadratically',5,6);  
-����-> 'ratica' 
+返回字符串str的位置pos起len个字符mysql> select substring('quadratically',5,6);  
+　　-> 'ratica' 
  
 substring(str,pos)   
 substring(str from pos)   
-�����ַ���str��λ��pos���һ���Ӵ�  
+返回字符串str的位置pos起的一个子串  
 mysql> select substring('quadratically',5);  
-����-> 'ratically' 
+　　-> 'ratically' 
 mysql> select substring('foobarbar' from 4);  
-����-> 'barbar' 
+　　-> 'barbar' 
  
 substring_index(str,delim,count)   
-���ش��ַ���str�ĵ�count�����ֵķָ���delim֮����Ӵ�
-(countΪ����ʱ�������,���򷵻��Ҷ��Ӵ�)  
+返回从字符串str的第count个出现的分隔符delim之后的子串
+(count为正数时返回左端,否则返回右端子串)  
 mysql> select substring_index('www.mysql.com', '.', 2);  
-����-> 'www.mysql' 
+　　-> 'www.mysql' 
 mysql> select substring_index('www.mysql.com', '.', -2);  
-����-> 'mysql.com' 
+　　-> 'mysql.com' 
  
 ltrim(str)   
-����ɾ������ո���ַ���str  
+返回删除了左空格的字符串str  
 mysql> select ltrim('  barbar');  
-����-> 'barbar' 
+　　-> 'barbar' 
  
 rtrim(str)   
-����ɾ�����ҿո���ַ���str  
+返回删除了右空格的字符串str  
 mysql> select rtrim('barbar   ');  
-����-> 'barbar' 
+　　-> 'barbar' 
  
 trim([[both | leading | trailing] [remstr] from] str)   
-����ǰ׺���׺remstr��ɾ���˵��ַ���str(λ�ò���Ĭ��both,remstrĬ��ֵΪ�ո�)  
+返回前缀或后缀remstr被删除了的字符串str(位置参数默认both,remstr默认值为空格)  
 mysql> select trim('  bar   ');  
-����-> 'bar' 
+　　-> 'bar' 
 mysql> select trim(leading 'x' from 'xxxbarxxx');  
-����-> 'barxxx' 
+　　-> 'barxxx' 
 mysql> select trim(both 'x' from 'xxxbarxxx');  
-����-> 'bar' 
+　　-> 'bar' 
 mysql> select trim(trailing 'xyz' from 'barxxyz');  
-����-> 'barx' 
+　　-> 'barx' 
  
 soundex(str)   
-����str��һ��ͬ���ַ���(��������������ͬ���ַ�������ͬ��
-ͬ���ַ���,��������ĸ�ַ�������,��a-z�����ĸ������Ԫ��)  
+返回str的一个同音字符串(听起来“大致相同”字符串有相同的
+同音字符串,非数字字母字符被忽略,在a-z外的字母被当作元音)  
 mysql> select soundex('hello');  
-����-> 'h400' 
+　　-> 'h400' 
 mysql> select soundex('quadratically');  
-����-> 'q36324' 
+　　-> 'q36324' 
    
 space(n)   
-������n���ո��ַ���ɵ�һ���ַ���  
+返回由n个空格字符组成的一个字符串  
 mysql> select space(6);  
-����-> '      ' 
+　　-> '      ' 
    
 replace(str,from_str,to_str)   
-���ַ���to_str�滻�ַ���str�е��Ӵ�from_str������  
+用字符串to_str替换字符串str中的子串from_str并返回  
 mysql> select replace('www.mysql.com', 'w', 'ww');  
-����-> 'wwwwww.mysql.com' 
+　　-> 'wwwwww.mysql.com' 
  
 repeat(str,count)   
-������count���ַ���str���ɵ�һ���ַ���(�κβ���Ϊnullʱ
-����null,count<=0ʱ����һ�����ַ���)  
+返回由count个字符串str连成的一个字符串(任何参数为null时
+返回null,count<=0时返回一个空字符串)  
 mysql> select repeat('mysql', 3);  
-����-> 'mysqlmysqlmysql' 
+　　-> 'mysqlmysqlmysql' 
    
 reverse(str)   
-�ߵ��ַ���str���ַ�˳�򲢷���  
+颠倒字符串str的字符顺序并返回  
 mysql> select reverse('abc');  
-����-> 'cba' 
+　　-> 'cba' 
  
 insert(str,pos,len,newstr)   
-���ַ���str��λ��pos��len���ַ������Ӵ��滻Ϊ�ַ���
-newstr������  
+把字符串str由位置pos起len个字符长的子串替换为字符串
+newstr并返回  
 mysql> select insert('quadratic', 3, 4, 'what');  
-����-> 'quwhattic' 
+　　-> 'quwhattic' 
  
 elt(n,str1,str2,str3,...)   
-���ص�n���ַ���(nС��1����ڲ�����������null)  
+返回第n个字符串(n小于1或大于参数个数返回null)  
 mysql> select elt(1, 'ej', 'heja', 'hej', 'foo');  
-����-> 'ej' 
+　　-> 'ej' 
 mysql> select elt(4, 'ej', 'heja', 'hej', 'foo');  
-����-> 'foo' 
+　　-> 'foo' 
  
 field(str,str1,str2,str3,...)   
-����str�������ĵ�n���ַ��������(���strû�ҵ�����0)  
+返回str等于其后的第n个字符串的序号(如果str没找到返回0)  
 mysql> select field('ej', 'hej', 'ej', 'heja', 'hej',
 'foo');  
-����-> 2  
+　　-> 2  
 mysql> select field('fo', 'hej', 'ej', 'heja', 'hej',
 'foo');  
-����-> 0  
+　　-> 0  
  
 find_in_set(str,strlist)   
-����str���ַ�����strlist�е����(�κβ�����null�򷵻�
-null,���strû�ҵ�����0,����1����","ʱ�����쳣)  
+返回str在字符串集strlist中的序号(任何参数是null则返回
+null,如果str没找到返回0,参数1包含","时工作异常)  
 mysql> select find_in_set('b','a,b,c,d');  
-����-> 2  
+　　-> 2  
    
 make_set(bits,str1,str2,...)  
-�Ѳ���1������תΪ������,����ĳ��λ�õĶ�����λ����1,��Ӧ
-λ�õ��ִ�ѡ���ִ���������(null�������ӵ������)  
+把参数1的数字转为二进制,假如某个位置的二进制位等于1,对应
+位置的字串选入字串集并返回(null串不添加到结果中)  
 mysql> select make_set(1,'a','b','c');  
-����-> 'a' 
+　　-> 'a' 
 mysql> select make_set(1 | 4,'hello','nice','world');  
-����-> 'hello,world' 
+　　-> 'hello,world' 
 mysql> select make_set(0,'a','b','c');  
-����-> '' 
+　　-> '' 
  
 export_set(bits,on,off,[separator,[number_of_bits]])   
-��bits�����ַ�����,ֻ�е�λ����1ʱ�����ִ�on,�������
-off(separatorĬ��ֵ",",number_of_bits����ʹ��ʱ���Ȳ��㲹0
-�������ض�)   
+按bits排列字符串集,只有当位等于1时插入字串on,否则插入
+off(separator默认值",",number_of_bits参数使用时长度不足补0
+而过长截断)   
 mysql> select export_set(5,'y','n',',',4)  
-����-> y,n,y,n   
+　　-> y,n,y,n   
  
 lcase(str)  
 lower(str)   
-����Сд���ַ���str  
+返回小写的字符串str  
 mysql> select lcase('quadratically');  
-����-> 'quadratically' 
+　　-> 'quadratically' 
    
 ucase(str)   
 upper(str)   
-���ش�д���ַ���str  
+返回大写的字符串str  
 mysql> select ucase('quadratically');  
-����-> 'quadratically' 
+　　-> 'quadratically' 
  
 load_file(file_name)   
-�����ļ�������Ϊһ���ַ��������ļ�����(�ļ��޷��ҵ�,·��
-������,û��Ȩ��,���ȴ���max_allowed_packet�᷵��null)  
+读入文件并且作为一个字符串返回文件内容(文件无法找到,路径
+不完整,没有权限,长度大于max_allowed_packet会返回null)  
 mysql> update table_name set blob_column=load_file
 ("/tmp/picture") where id=1;  
  
-2����ѧ����
+2、数学函数
 abs(n)  
-����n�ľ���ֵ  
+返回n的绝对值  
 mysql> select abs(2);    
-����-> 2    
+　　-> 2    
 mysql> select abs(-32);    
-����-> 32    
+　　-> 32    
    
 sign(n)  
-���ز����ķ���(Ϊ-1��0��1)  
+返回参数的符号(为-1、0或1)  
 mysql> select sign(-32);    
-����-> -1    
+　　-> -1    
 mysql> select sign(0);    
-����-> 0    
+　　-> 0    
 mysql> select sign(234);    
-����-> 1    
+　　-> 1    
  
 mod(n,m)    
-ȡģ����,����n��m��������(ͬ%������)    
+取模运算,返回n被m除的余数(同%操作符)    
 mysql> select mod(234, 10);    
-����-> 4    
+　　-> 4    
 mysql> select 234 % 10;    
-����-> 4    
+　　-> 4    
 mysql> select mod(29,9);    
-����-> 2    
+　　-> 2    
  
 floor(n)  
-���ز�����n���������ֵ  
+返回不大于n的最大整数值  
 mysql> select floor(1.23);    
-����-> 1    
+　　-> 1    
 mysql> select floor(-1.23);    
-����-> -2    
+　　-> -2    
  
 ceiling(n)  
-���ز�С��n����С����ֵ  
+返回不小于n的最小整数值  
 mysql> select ceiling(1.23);    
-����-> 2    
+　　-> 2    
 mysql> select ceiling(-1.23);    
-����-> -1    
+　　-> -1    
  
 round(n,d)  
-����n����������ֵ,����dλС��(d��Ĭ��ֵΪ0)  
+返回n的四舍五入值,保留d位小数(d的默认值为0)  
 mysql> select round(-1.23);    
-����-> -1    
+　　-> -1    
 mysql> select round(-1.58);    
-����-> -2    
+　　-> -2    
 mysql> select round(1.58);    
-����-> 2    
+　　-> 2    
 mysql> select round(1.298, 1);    
-����-> 1.3    
+　　-> 1.3    
 mysql> select round(1.298, 0);    
-����-> 1    
+　　-> 1    
  
 exp(n)  
-����ֵe��n�η�(��Ȼ�����ĵ�)  
+返回值e的n次方(自然对数的底)  
 mysql> select exp(2);    
-����-> 7.389056    
+　　-> 7.389056    
 mysql> select exp(-2);    
-����-> 0.135335    
+　　-> 0.135335    
  
 log(n)  
-����n����Ȼ����  
+返回n的自然对数  
 mysql> select log(2);    
-����-> 0.693147    
+　　-> 0.693147    
 mysql> select log(-2);    
-����-> null    
+　　-> null    
  
 log10(n)  
-����n��10Ϊ�׵Ķ���  
+返回n以10为底的对数  
 mysql> select log10(2);    
-����-> 0.301030    
+　　-> 0.301030    
 mysql> select log10(100);    
-����-> 2.000000    
+　　-> 2.000000    
 mysql> select log10(-100);    
-����-> null    
+　　-> null    
  
 pow(x,y)    
 power(x,y)    
-������ֵx��y����  
+　返回值x的y次幂  
 mysql> select pow(2,2);    
-����-> 4.000000    
+　　-> 4.000000    
 mysql> select pow(2,-2);    
-����-> 0.250000  
+　　-> 0.250000  
  
 sqrt(n)  
-�����طǸ���n��ƽ����  
+　返回非负数n的平方根  
 mysql> select sqrt(4);    
-����-> 2.000000    
+　　-> 2.000000    
 mysql> select sqrt(20);    
-����-> 4.472136    
+　　-> 4.472136    
  
 pi()    
-������Բ����   
+　返回圆周率   
 mysql> select pi();    
-����-> 3.141593    
+　　-> 3.141593    
  
 cos(n)  
-������n������ֵ  
+　返回n的余弦值  
 mysql> select cos(pi());  
-����-> -1.000000    
+　　-> -1.000000    
  
 sin(n)  
-������n������ֵ   
+　返回n的正弦值   
 mysql> select sin(pi());    
-����-> 0.000000    
+　　-> 0.000000    
  
 tan(n)  
-����n������ֵ  
+返回n的正切值  
 mysql> select tan(pi()+1);    
-����-> 1.557408    
+　　-> 1.557408    
  
 acos(n)  
-������n������(n������ֵ,��-1��1�ķ�Χ,���򷵻�null)  
+　返回n反余弦(n是余弦值,在-1到1的范围,否则返回null)  
 mysql> select acos(1);    
-����-> 0.000000    
+　　-> 0.000000    
 mysql> select acos(1.0001);    
-����-> null    
+　　-> null    
 mysql> select acos(0);    
-����-> 1.570796    
+　　-> 1.570796    
  
 asin(n)  
-����n������ֵ  
+返回n反正弦值  
 mysql> select asin(0.2);    
-����-> 0.201358    
+　　-> 0.201358    
 mysql> select asin('foo');    
-����-> 0.000000    
+　　-> 0.000000    
  
 atan(n)  
-����n�ķ�����ֵ  
+返回n的反正切值  
 mysql> select atan(2);    
-����-> 1.107149    
+　　-> 1.107149    
 mysql> select atan(-2);    
-����-> -1.107149    
+　　-> -1.107149    
 atan2(x,y)    
-������2������x��y�ķ�����(����y/x�ķ�����,���ž�������)  
+　返回2个变量x和y的反正切(类似y/x的反正切,符号决定象限)  
 mysql> select atan(-2,2);    
-����-> -0.785398    
+　　-> -0.785398    
 mysql> select atan(pi(),0);    
-����-> 1.570796    
+　　-> 1.570796    
  
 cot(n)  
-����x������  
+返回x的余切  
 mysql> select cot(12);    
-����-> -1.57267341    
+　　-> -1.57267341    
 mysql> select cot(0);    
-����-> null    
+　　-> null    
  
-rand()  
-rand(n)    
-�����ڷ�Χ0��1.0�ڵ��������ֵ(����ʹ������n��Ϊ��ʼֵ) 
- 
-mysql> select rand();    
-����-> 0.5925    
-mysql> select rand(20);    
-����-> 0.1811    
-mysql> select rand(20);    
-����-> 0.1811    
-mysql> select rand();    
-����-> 0.2079    
-mysql> select rand();    
-����-> 0.7888    
  
 degrees(n)  
-��n�ӻ��ȱ任Ϊ�ǶȲ�����  
+把n从弧度变换为角度并返回  
 mysql> select degrees(pi());    
-����-> 180.000000    
+　　-> 180.000000    
  
 radians(n)  
-��n�ӽǶȱ任Ϊ���Ȳ�����   
+把n从角度变换为弧度并返回   
 mysql> select radians(90);    
-����-> 1.570796    
+　　-> 1.570796    
  
 truncate(n,d)    
-��������n��dλС��������  
+保留数字n的d位小数并返回  
 mysql> select truncate(1.223,1);    
-����-> 1.2    
+　　-> 1.2    
 mysql> select truncate(1.999,1);    
-����-> 1.9    
+　　-> 1.9    
 mysql> select truncate(1.999,0);    
-����-> 1    
+　　-> 1    
  
 least(x,y,...)    
-������Сֵ(�������ֵ����������(ʵ�����С�����ִ�)�����Ļ����в�����������(ʵ�����С�����ִ�)��������Ϊ����(ʵ�����С�����ִ�)�Ƚ�,���򰴺��Դ�Сд���ַ������Ƚ�)  
+返回最小值(如果返回值被用在整数(实数或大小敏感字串)上下文或所有参数都是整数(实数或大小敏感字串)则他们作为整数(实数或大小敏感字串)比较,否则按忽略大小写的字符串被比较)  
 mysql> select least(2,0);    
-����-> 0    
+　　-> 0    
 mysql> select least(34.0,3.0,5.0,767.0);    
-����-> 3.0    
+　　-> 3.0    
 mysql> select least("b","a","c");    
-����-> "a"    
+　　-> "a"    
  
 greatest(x,y,...)    
-�������ֵ(����ͬleast())  
+返回最大值(其余同least())  
 mysql> select greatest(2,0);    
-����-> 2    
+　　-> 2    
 mysql> select greatest(34.0,3.0,5.0,767.0);    
-����-> 767.0    
+　　-> 767.0    
 mysql> select greatest("b","a","c");    
-����-> "c"     
+　　-> "c"     
  
-3��ʱ��ʱ�亯�� 
+3、时期时间函数 
 dayofweek(date)    
-��������date�����ڼ�(1=������,2=����һ,����7=������,odbc��׼)  
+返回日期date是星期几(1=星期天,2=星期一,……7=星期六,odbc标准)  
 mysql> select dayofweek('1998-02-03');    
-����-> 3    
+　　-> 3    
  
 weekday(date)    
-��������date�����ڼ�(0=����һ,1=���ڶ�,����6= ������)�� 
+返回日期date是星期几(0=星期一,1=星期二,……6= 星期天)。 
   
 mysql> select weekday('1997-10-04 22:23:00');    
-����-> 5    
+　　-> 5    
 mysql> select weekday('1997-11-05');    
-����-> 2    
+　　-> 2    
  
 dayofmonth(date)    
-����date��һ���еĵڼ���(��1��31��Χ��)    
+返回date是一月中的第几日(在1到31范围内)    
 mysql> select dayofmonth('1998-02-03');    
-����-> 3    
+　　-> 3    
  
 dayofyear(date)    
-����date��һ���еĵڼ���(��1��366��Χ��)    
+返回date是一年中的第几日(在1到366范围内)    
 mysql> select dayofyear('1998-02-03');    
-����-> 34    
+　　-> 34    
  
 month(date)    
-����date�е��·���ֵ    
+返回date中的月份数值    
 mysql> select month('1998-02-03');    
-����-> 2    
+　　-> 2    
  
 dayname(date)    
-����date�����ڼ�(��Ӣ��������)  
+返回date是星期几(按英文名返回)  
 mysql> select dayname("1998-02-05");    
-����-> 'thursday'    
+　　-> 'thursday'    
  
 monthname(date)    
-����date�Ǽ���(��Ӣ��������)  
+返回date是几月(按英文名返回)  
 mysql> select monthname("1998-02-05");    
-����-> 'february'    
+　　-> 'february'    
  
 quarter(date)    
-����date��һ��ĵڼ�������    
+返回date是一年的第几个季度    
 mysql> select quarter('98-04-01');    
-����-> 2    
+　　-> 2    
  
 week(date,first)   
-����date��һ��ĵڼ���(firstĬ��ֵ0,firstȡֵ1��ʾ��һ��
-�ܵĿ�ʼ,0�����տ�ʼ)  
+返回date是一年的第几周(first默认值0,first取值1表示周一是
+周的开始,0从周日开始)  
 mysql> select week('1998-02-20');    
-����-> 7    
+　　-> 7    
 mysql> select week('1998-02-20',0);    
-����-> 7    
+　　-> 7    
 mysql> select week('1998-02-20',1);    
-����-> 8    
+　　-> 8    
  
 year(date)    
-����date�����(��Χ��1000��9999)    
+返回date的年份(范围在1000到9999)    
 mysql> select year('98-02-03');    
-����-> 1998    
+　　-> 1998    
  
 hour(time)    
-����time��Сʱ��(��Χ��0��23)   
+返回time的小时数(范围是0到23)   
 mysql> select hour('10:05:03');    
-����-> 10    
+　　-> 10    
  
 minute(time)    
-����time�ķ�����(��Χ��0��59)    
+返回time的分钟数(范围是0到59)    
 mysql> select minute('98-02-03 10:05:03');    
-����-> 5    
+　　-> 5    
  
 second(time)    
-����time������(��Χ��0��59)   
+返回time的秒数(范围是0到59)   
 mysql> select second('10:05:03');    
-����-> 3    
+　　-> 3    
  
 period_add(p,n)    
-����n���µ�ʱ��p������(p�ĸ�ʽyymm��yyyymm)    
+增加n个月到时期p并返回(p的格式yymm或yyyymm)    
 mysql> select period_add(9801,2);    
-����-> 199803    
+　　-> 199803    
  
 period_diff(p1,p2)    
-������ʱ��p1��p2֮������(p1��p2�ĸ�ʽyymm��yyyymm)  
+返回在时期p1和p2之间月数(p1和p2的格式yymm或yyyymm)  
 mysql> select period_diff(9802,199703);    
-����-> 11    
+　　-> 11    
  
 date_add(date,interval expr type)  
 date_sub(date,interval expr type)    
 adddate(date,interval expr type)    
 subdate(date,interval expr type)  
-������ʱ����мӼ�������  
-(adddate()��subdate()��date_add()��date_sub()��ͬ���,Ҳ�����������+��-�����Ǻ���  
-date��һ��datetime��dateֵ,expr��date���мӼ�����һ������ʽ�ַ�����typeָ������ʽexprӦ����α�����  
-��[typeֵ ���� ������expr��ʽ]:  
-��second �� seconds    
-��minute ���� minutes    
-��hour ʱ�� hours    
-��day �� days    
-��month �� months    
-��year �� years    
-��minute_second ���Ӻ��� "minutes:seconds"    
-��hour_minute Сʱ�ͷ��� "hours:minutes"    
-��day_hour ���Сʱ "days hours"    
-��year_month ����� "years-months"    
-��hour_second Сʱ, ���ӣ� "hours:minutes:seconds"    
-��day_minute ��, Сʱ, ���� "days hours:minutes"    
-��day_second ��, Сʱ, ����, �� "days
+对日期时间进行加减法运算  
+(adddate()和subdate()是date_add()和date_sub()的同义词,也可以用运算符+和-而不是函数  
+date是一个datetime或date值,expr对date进行加减法的一个表达式字符串，type指明表达式expr应该如何被解释  
+　[type值 含义 期望的expr格式]:  
+　second 秒 seconds    
+　minute 分钟 minutes    
+　hour 时间 hours    
+　day 天 days    
+　month 月 months    
+　year 年 years    
+　minute_second 分钟和秒 "minutes:seconds"    
+　hour_minute 小时和分钟 "hours:minutes"    
+　day_hour 天和小时 "days hours"    
+　year_month 年和月 "years-months"    
+　hour_second 小时, 分钟， "hours:minutes:seconds"    
+　day_minute 天, 小时, 分钟 "days hours:minutes"    
+　day_second 天, 小时, 分钟, 秒 "days
 hours:minutes:seconds" 
-��expr�������κα�����ָ���,���������dateֵʱ�����һ��
-dateֵ,��������һ��datetimeֵ)  
-�����type�ؼ��ʲ�����,��mysql���Ҷ�ȡֵ,day_second��Ϊȱ
-��Сʱ���ӵ���minute_second)  
-���������month��year_month��year,�������ڽ���·ݵ������
-����ʹ���������)    
+　expr中允许任何标点做分隔符,如果所有是date值时结果是一个
+date值,否则结果是一个datetime值)  
+　如果type关键词不完整,则mysql从右端取值,day_second因为缺
+少小时分钟等于minute_second)  
+　如果增加month、year_month或year,天数大于结果月份的最大天
+数则使用最大天数)    
 mysql> select "1997-12-31 23:59:59" + interval 1 second;  
  
-����-> 1998-01-01 00:00:00    
+　　-> 1998-01-01 00:00:00    
 mysql> select interval 1 day + "1997-12-31";    
-����-> 1998-01-01    
+　　-> 1998-01-01    
 mysql> select "1998-01-01" - interval 1 second;    
-����-> 1997-12-31 23:59:59    
+　　-> 1997-12-31 23:59:59    
 mysql> select date_add("1997-12-31 23:59:59",interval 1
 second);    
-����-> 1998-01-01 00:00:00    
+　　-> 1998-01-01 00:00:00    
 mysql> select date_add("1997-12-31 23:59:59",interval 1
 day);    
-����-> 1998-01-01 23:59:59    
+　　-> 1998-01-01 23:59:59    
 mysql> select date_add("1997-12-31 23:59:59",interval
 "1:1" minute_second);    
-����-> 1998-01-01 00:01:00    
+　　-> 1998-01-01 00:01:00    
 mysql> select date_sub("1998-01-01 00:00:00",interval "1
 1:1:1" day_second);    
-����-> 1997-12-30 22:58:59    
+　　-> 1997-12-30 22:58:59    
 mysql> select date_add("1998-01-01 00:00:00", interval "-1
 10" day_hour);  
-����-> 1997-12-30 14:00:00    
+　　-> 1997-12-30 14:00:00    
 mysql> select date_sub("1998-01-02", interval 31 day);    
-����-> 1997-12-02    
+　　-> 1997-12-02    
 mysql> select extract(year from "1999-07-02");    
-����-> 1999    
+　　-> 1999    
 mysql> select extract(year_month from "1999-07-02
 01:02:03");    
-����-> 199907    
+　　-> 199907    
 mysql> select extract(day_minute from "1999-07-02
 01:02:03");    
-����-> 20102    
+　　-> 20102    
  
 to_days(date)    
-��������date����Ԫ0�����������(������1582����ǰ)  
+返回日期date是西元0年至今多少天(不计算1582年以前)  
 mysql> select to_days(950501);    
-����-> 728779    
+　　-> 728779    
 mysql> select to_days('1997-10-07');    
-����-> 729669    
+　　-> 729669    
  
 from_days(n)    
-��������Ԫ0����������췵��dateֵ(������1582����ǰ)   
+　给出西元0年至今多少天返回date值(不计算1582年以前)   
 mysql> select from_days(729669);    
-����-> '1997-10-07'    
+　　-> '1997-10-07'    
  
 date_format(date,format)    
-������format�ַ�����ʽ��dateֵ  
-��(��format�ַ����п��ñ�־��:  
-��%m ������(january����december)    
-��%w ��������(sunday����saturday)    
-��%d ��Ӣ��ǰ׺���·ݵ�����(1st, 2nd, 3rd, �ȵȡ���    
-��%y ��, ����, 4 λ    
-��%y ��, ����, 2 λ    
-��%a ��д����������(sun����sat)    
-��%d �·��е�����, ����(00����31)    
-��%e �·��е�����, ����(0����31)    
-��%m ��, ����(01����12)    
-��%c ��, ����(1����12)    
-��%b ��д���·�����(jan����dec)    
-��%j һ���е�����(001����366)    
-��%h Сʱ(00����23)    
-��%k Сʱ(0����23)    
-��%h Сʱ(01����12)    
-��%i Сʱ(01����12)    
-��%l Сʱ(1����12)    
-��%i ����, ����(00����59)    
-��%r ʱ��,12 Сʱ(hh:mm:ss [ap]m)    
-��%t ʱ��,24 Сʱ(hh:mm:ss)    
-��%s ��(00����59)    
-��%s ��(00����59)    
-��%p am��pm    
-��%w һ�������е�����(0=sunday ����6=saturday ��    
-��%u ����(0����52), ���������������ڵĵ�һ��    
-��%u ����(0����52), ��������һ�����ڵĵ�һ��    
-��%% �ַ�% )  
+　根据format字符串格式化date值  
+　(在format字符串中可用标志符:  
+　%m 月名字(january……december)    
+　%w 星期名字(sunday……saturday)    
+　%d 有英语前缀的月份的日期(1st, 2nd, 3rd, 等等。）    
+　%y 年, 数字, 4 位    
+　%y 年, 数字, 2 位    
+　%a 缩写的星期名字(sun……sat)    
+　%d 月份中的天数, 数字(00……31)    
+　%e 月份中的天数, 数字(0……31)    
+　%m 月, 数字(01……12)    
+　%c 月, 数字(1……12)    
+　%b 缩写的月份名字(jan……dec)    
+　%j 一年中的天数(001……366)    
+　%h 小时(00……23)    
+　%k 小时(0……23)    
+　%h 小时(01……12)    
+　%i 小时(01……12)    
+　%l 小时(1……12)    
+　%i 分钟, 数字(00……59)    
+　%r 时间,12 小时(hh:mm:ss [ap]m)    
+　%t 时间,24 小时(hh:mm:ss)    
+　%s 秒(00……59)    
+　%s 秒(00……59)    
+　%p am或pm    
+　%w 一个星期中的天数(0=sunday ……6=saturday ）    
+　%u 星期(0……52), 这里星期天是星期的第一天    
+　%u 星期(0……52), 这里星期一是星期的第一天    
+　%% 字符% )  
 mysql> select date_format('1997-10-04 22:23:00','%w %m %
 y');    
-����-> 'saturday october 1997'    
+　　-> 'saturday october 1997'    
 mysql> select date_format('1997-10-04 22:23:00','%h:%i:%
 s');    
-����-> '22:23:00'    
+　　-> '22:23:00'    
 mysql> select date_format('1997-10-04 22:23:00','%d %y %a
 %d %m %b %j');    
-����-> '4th 97 sat 04 10 oct 277'    
+　　-> '4th 97 sat 04 10 oct 277'    
 mysql> select date_format('1997-10-04 22:23:00','%h %k %i
 %r %t %s %w');    
-����-> '22 22 10 10:23:00 pm 22:23:00 00 6'    
+　　-> '22 22 10 10:23:00 pm 22:23:00 00 6'    
  
 time_format(time,format)  
-����date_format()����,��time_formatֻ����Сʱ�����Ӻ���(��
-����Ų���һ��nullֵ��0)  
+　和date_format()类似,但time_format只处理小时、分钟和秒(其
+余符号产生一个null值或0)  
  
 curdate()     
 current_date()  
-����'yyyy-mm-dd'��yyyymmdd��ʽ���ص�ǰ����ֵ(���ݷ���ֵ��
-�����������ַ���������)    
+　以'yyyy-mm-dd'或yyyymmdd格式返回当前日期值(根据返回值所
+处上下文是字符串或数字)    
 mysql> select curdate();    
-����-> '1997-12-15'    
+　　-> '1997-12-15'    
 mysql> select curdate() + 0;    
-����-> 19971215    
+　　-> 19971215    
  
 curtime()    
 current_time()  
-����'hh:mm:ss'��hhmmss��ʽ���ص�ǰʱ��ֵ(���ݷ���ֵ������
-�������ַ���������)      
+　以'hh:mm:ss'或hhmmss格式返回当前时间值(根据返回值所处上
+下文是字符串或数字)      
 mysql> select curtime();    
-����-> '23:50:26'    
+　　-> '23:50:26'    
 mysql> select curtime() + 0;    
-����-> 235026    
+　　-> 235026    
  
 now()    
 sysdate()    
 current_timestamp()  
-����'yyyy-mm-dd hh:mm:ss'��yyyymmddhhmmss��ʽ���ص�ǰ����
-ʱ��(���ݷ���ֵ�������������ַ���������)     
+　以'yyyy-mm-dd hh:mm:ss'或yyyymmddhhmmss格式返回当前日期
+时间(根据返回值所处上下文是字符串或数字)     
 mysql> select now();    
-����-> '1997-12-15 23:50:26'    
+　　-> '1997-12-15 23:50:26'    
 mysql> select now() + 0;    
-����-> 19971215235026    
+　　-> 19971215235026    
  
 unix_timestamp()    
 unix_timestamp(date)    
-����һ��unixʱ���(��'1970-01-01 00:00:00'gmt��ʼ����
-��,dateĬ��ֵΪ��ǰʱ��)  
+返回一个unix时间戳(从'1970-01-01 00:00:00'gmt开始的秒
+数,date默认值为当前时间)  
 mysql> select unix_timestamp();    
-����-> 882226357    
+　　-> 882226357    
 mysql> select unix_timestamp('1997-10-04 22:23:00');    
-����-> 875996580    
+　　-> 875996580    
  
 from_unixtime(unix_timestamp)    
-��'yyyy-mm-dd hh:mm:ss'��yyyymmddhhmmss��ʽ����ʱ�����
-ֵ(���ݷ���ֵ�������������ַ���������)     
+以'yyyy-mm-dd hh:mm:ss'或yyyymmddhhmmss格式返回时间戳的
+值(根据返回值所处上下文是字符串或数字)     
 mysql> select from_unixtime(875996580);    
-����-> '1997-10-04 22:23:00'    
+　　-> '1997-10-04 22:23:00'    
 mysql> select from_unixtime(875996580) + 0;    
-����-> 19971004222300    
+　　-> 19971004222300    
  
 from_unixtime(unix_timestamp,format)    
-��format�ַ�����ʽ����ʱ�����ֵ  
+以format字符串格式返回时间戳的值  
 mysql> select from_unixtime(unix_timestamp(),'%y %d %m %
 h:%i:%s %x');    
-����-> '1997 23rd december 03:43:30 x'    
+　　-> '1997 23rd december 03:43:30 x'    
  
 sec_to_time(seconds)    
-��'hh:mm:ss'��hhmmss��ʽ��������ת�ɵ�timeֵ(���ݷ���ֵ�������������ַ���������)     
+以'hh:mm:ss'或hhmmss格式返回秒数转成的time值(根据返回值所处上下文是字符串或数字)     
 mysql> select sec_to_time(2378);    
-����-> '00:39:38'    
+　　-> '00:39:38'    
 mysql> select sec_to_time(2378) + 0;    
-����-> 3938    
+　　-> 3938    
  
 time_to_sec(time)    
-����timeֵ�ж�����    
+返回time值有多少秒    
 mysql> select time_to_sec('22:23:00');    
-����-> 80580    
+　　-> 80580    
 mysql> select time_to_sec('00:39:38');    
-����-> 2378 
+　　-> 2378 
  
-ת������
+转换函数
 cast
-�÷���cast(�ֶ� as ��������) [��Ȼ�Ƿ���Գɹ�ת������Ҫ����������ǿ��ת��ʱע�������]
-ʵ����select cast(a as unsigned) as b from cardserver where order by b desc;
-convert��
-�÷���convert(�ֶ�,��������)
-ʵ����select convert(a ,unsigned) as b from cardserver where order by b desc;
+用法：cast(字段 as 数据类型) [当然是否可以成功转换，还要看数据类型强制转化时注意的问题]
+实例：select cast(a as unsigned) as b from cardserver where order by b desc;
+convert：
+用法：convert(字段,数据类型)
+实例：select convert(a ,unsigned) as b from cardserver where order by b desc;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MYSQL 存储引擎中InnoDB与Myisam的主要区别
+
+1， 事务处理
+innodb 支持事务功能，myisam 不支持。
+Myisam 的执行速度更快，性能更好。
+
+2，select ，update ，insert ，delete 操作
+
+MyISAM：如果执行大量的SELECT，MyISAM是更好的选择
+InnoDB：如果你的数据执行大量的INSERT或UPDATE，出于性能方面的考虑，应该使用InnoDB表
+
+3，锁机制不同
+
+InnoDB 为行级锁，myisam 为表级锁。
+注意：当数据库无法确定，所找的行时，也会变为锁定整个表。
+如： update table set num = 10 where username like "%test%";
+
+4，查询表的行数不同
+MyISAM：select count(*) from table，MyISAM只要简单的读出保存好的行数，注意的是，当count(*)语句包含   where条件时，两种表的操作是一样的
+
+InnoDB ： InnoDB 中不保存表的具体行数，也就是说，执行select count(*) from table时，InnoDB要扫描一遍整个表来计算有多少行
+
+5，物理结构不同
+
+MyISAM ：每个MyISAM在磁盘上存储成三个文件。第一个文件的名字以表的名字开始，扩展名指出文件类型。
+  .frm文件存储表定义。
+  数据文件的扩展名为.MYD (MYData)。
+  索引文件的扩展名是.MYI (MYIndex)
+
+InnoDB：基于磁盘的资源是InnoDB表空间数据文件和它的日志文件，InnoDB 表的大小只受限于操作系统文件的大小，一般为 2GB
+6，anto_increment 机制不同
+ 更好和更快的auto_increment处理
+
+
+其他：为什么MyISAM会比Innodb 的查询速度快。
+INNODB在做SELECT的时候，要维护的东西比MYISAM引擎多很多；
+1）数据块，INNODB要缓存，MYISAM只缓存索引块，  这中间还有换进换出的减少； 
+2）innodb寻址要映射到块，再到行，MYISAM 记录的直接是文件的OFFSET，定位比INNODB要快
+3）INNODB还需要维护MVCC一致；虽然你的场景没有，但他还是需要去检查和维护
+MVCC ( Multi-Version Concurrency Control )多版本并发控制 
+InnoDB：通过为每一行记录添加两个额外的隐藏的值来实现MVCC，这两个值一个记录这行数据何时被创建，另外一个记录这行数据何时过期（或者被删除）。但是InnoDB并不存储这些事件发生时的实际时间，相反它只存储这些事件发生时的系统版本号。这是一个随着事务的创建而不断增长的数字。每个事务在事务开始时会记录它自己的系统版本号。每个查询必须去检查每行数据的版本号与事务的版本号是否相同。让我们来看看当隔离级别是REPEATABLE READ时这种策略是如何应用到特定的操作的：
+　　SELECT InnoDB必须每行数据来保证它符合两个条件：
+　　1、InnoDB必须找到一个行的版本，它至少要和事务的版本一样老(也即它的版本号不大于事务的版本号)。这保证了不管是事务开始之前，或者事务创建时，或者修改了这行数据的时候，这行数据是存在的。
+　　2、这行数据的删除版本必须是未定义的或者比事务版本要大。这可以保证在事务开始之前这行数据没有被删除。
+
+MYSQL常用命令
+$ mysql --help
+mysql  Ver 14.14 Distrib 5.6.24, for Linux (x86_64) using  EditLine wrapper
+Copyright (c) 2000, 2015, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Usage: mysql [OPTIONS] [database]
+  -?, --help          Display this help and exit.
+  -I, --help          Synonym for -?
+  --auto-rehash       Enable automatic rehashing. One doesn't need to use
+                      'rehash' to get table and field completion, but startup
+                      and reconnecting may take a longer time. Disable with
+                      --disable-auto-rehash.
+                      (Defaults to on; use --skip-auto-rehash to disable.)
+  -A, --no-auto-rehash 
+                      No automatic rehashing. One has to use 'rehash' to get
+                      table and field completion. This gives a quicker start of
+                      mysql and disables rehashing on reconnect.
+  --auto-vertical-output 
+                      Automatically switch to vertical output mode if the
+                      result is wider than the terminal width.
+  -B, --batch         Don't use history file. Disable interactive behavior.
+                      (Enables --silent.)
+  --bind-address=name IP address to bind to.
+  --character-sets-dir=name 
+                      Directory for character set files.
+  --column-type-info  Display column type information.
+  -c, --comments      Preserve comments. Send comments to the server. The
+                      default is --skip-comments (discard comments), enable
+                      with --comments.
+  -C, --compress      Use compression in server/client protocol.
+  -#, --debug[=#]     This is a non-debug version. Catch this and exit.
+  --debug-check       Check memory and open file usage at exit.
+  -T, --debug-info    Print some debug info at exit.
+  -D, --database=name Database to use.
+  --default-character-set=name 
+                      Set the default character set.
+  --delimiter=name    Delimiter to be used.
+  --enable-cleartext-plugin 
+                      Enable/disable the clear text authentication plugin.
+  -e, --execute=name  Execute command and quit. (Disables --force and history
+                      file.)
+  -E, --vertical      Print the output of a query (rows) vertically.
+  -f, --force         Continue even if we get an SQL error.
+  -G, --named-commands 
+                      Enable named commands. Named commands mean this program's
+                      internal commands; see mysql> help . When enabled, the
+                      named commands can be used from any line of the query,
+                      otherwise only from the first line, before an enter.
+                      Disable with --disable-named-commands. This option is
+                      disabled by default.
+  -i, --ignore-spaces Ignore space after function names.
+  --init-command=name SQL Command to execute when connecting to MySQL server.
+                      Will automatically be re-executed when reconnecting.
+  --local-infile      Enable/disable LOAD DATA LOCAL INFILE.
+  -b, --no-beep       Turn off beep on error.
+  -h, --host=name     Connect to host.
+  -H, --html          Produce HTML output.
+  -X, --xml           Produce XML output.
+  --line-numbers      Write line numbers for errors.
+                      (Defaults to on; use --skip-line-numbers to disable.)
+  -L, --skip-line-numbers 
+                      Don't write line number for errors.
+  -n, --unbuffered    Flush buffer after each query.
+  --column-names      Write column names in results.
+                      (Defaults to on; use --skip-column-names to disable.)
+  -N, --skip-column-names 
+                      Don't write column names in results.
+  --sigint-ignore     Ignore SIGINT (CTRL-C).
+  -o, --one-database  Ignore statements except those that occur while the
+                      default database is the one named at the command line.
+  --pager[=name]      Pager to use to display results. If you don't supply an
+                      option, the default pager is taken from your ENV variable
+                      PAGER. Valid pagers are less, more, cat [> filename],
+                      etc. See interactive help (\h) also. This option does not
+                      work in batch mode. Disable with --disable-pager. This
+                      option is disabled by default.
+  -p, --password[=name] 
+                      Password to use when connecting to server. If password is
+                      not given it's asked from the tty.
+  -P, --port=#        Port number to use for connection or 0 for default to, in
+                      order of preference, my.cnf, $MYSQL_TCP_PORT,
+                      /etc/services, built-in default (3306).
+  --prompt=name       Set the mysql prompt to this value.
+  --protocol=name     The protocol to use for connection (tcp, socket, pipe,
+                      memory).
+  -q, --quick         Don't cache result, print it row by row. This may slow
+                      down the server if the output is suspended. Doesn't use
+                      history file.
+  -r, --raw           Write fields without conversion. Used with --batch.
+  --reconnect         Reconnect if the connection is lost. Disable with
+                      --disable-reconnect. This option is enabled by default.
+                      (Defaults to on; use --skip-reconnect to disable.)
+  -s, --silent        Be more silent. Print results with a tab as separator,
+                      each row on new line.
+  -S, --socket=name   The socket file to use for connection.
+  --ssl               Enable SSL for connection (automatically enabled with
+                      other flags).
+  --ssl-ca=name       CA file in PEM format (check OpenSSL docs, implies
+                      --ssl).
+  --ssl-capath=name   CA directory (check OpenSSL docs, implies --ssl).
+  --ssl-cert=name     X509 cert in PEM format (implies --ssl).
+  --ssl-cipher=name   SSL cipher to use (implies --ssl).
+  --ssl-key=name      X509 key in PEM format (implies --ssl).
+  --ssl-crl=name      Certificate revocation list (implies --ssl).
+  --ssl-crlpath=name  Certificate revocation list path (implies --ssl).
+  --ssl-verify-server-cert 
+                      Verify server's "Common Name" in its cert against
+                      hostname used when connecting. This option is disabled by
+                      default.
+  -t, --table         Output in table format.
+  --tee=name          Append everything into outfile. See interactive help (\h)
+                      also. Does not work in batch mode. Disable with
+                      --disable-tee. This option is disabled by default.
+  -u, --user=name     User for login if not current user.
+  -U, --safe-updates  Only allow UPDATE and DELETE that uses keys.
+  -U, --i-am-a-dummy  Synonym for option --safe-updates, -U.
+  -v, --verbose       Write more. (-v -v -v gives the table output format).
+  -V, --version       Output version information and exit.
+  -w, --wait          Wait and retry if connection is down.
+  --connect-timeout=# Number of seconds before connection timeout.
+  --max-allowed-packet=# 
+                      The maximum packet length to send to or receive from
+                      server.
+  --net-buffer-length=# 
+                      The buffer size for TCP/IP and socket communication.
+  --select-limit=#    Automatic limit for SELECT when using --safe-updates.
+  --max-join-size=#   Automatic limit for rows in a join when using
+                      --safe-updates.
+  --secure-auth       Refuse client connecting to server if it uses old
+                      (pre-4.1.1) protocol.
+                      (Defaults to on; use --skip-secure-auth to disable.)
+  --server-arg=name   Send embedded server this as a parameter.
+  --show-warnings     Show warnings after every statement.
+  --plugin-dir=name   Directory for client-side plugins.
+  --default-auth=name Default authentication client-side plugin to use.
+  --histignore=name   A colon-separated list of patterns to keep statements
+                      from getting logged into mysql history.
+  --binary-mode       By default, ASCII '\0' is disallowed and '\r\n' is
+                      translated to '\n'. This switch turns off both features,
+                      and also turns off parsing of all clientcommands except
+                      \C and DELIMITER, in non-interactive mode (for input
+                      piped to mysql or loaded using the 'source' command).
+                      This is necessary when processing output from mysqlbinlog
+                      that may contain blobs.
+  --connect-expired-password 
+                      Notify the server that this client is prepared to handle
+                      expired password sandbox mode.
+
+Default options are read from the following files in the given order:
+/etc/my.cnf /etc/mysql/my.cnf /usr/etc/my.cnf ~/.my.cnf 
+The following groups are read: mysql client
+The following options may be given as the first argument:
+--print-defaults        Print the program argument list and exit.
+--no-defaults           Don't read default options from any option file,
+                        except for login file.
+--defaults-file=#       Only read default options from the given file #.
+--defaults-extra-file=# Read this file after the global files are read.
+--defaults-group-suffix=#
+                        Also read groups with concat(group, suffix)
+--login-path=#          Read this path from the login file.
+
+Variables (--variable-name=value)
+and boolean options {FALSE|TRUE}  Value (after reading options)
+--------------------------------- ----------------------------------------
+auto-rehash                       TRUE
+auto-vertical-output              FALSE
+bind-address                      (No default value)
+character-sets-dir                (No default value)
+column-type-info                  FALSE
+comments                          FALSE
+compress                          FALSE
+debug-check                       FALSE
+debug-info                        FALSE
+database                          (No default value)
+default-character-set             auto
+delimiter                         ;
+enable-cleartext-plugin           FALSE
+vertical                          FALSE
+force                             FALSE
+named-commands                    FALSE
+ignore-spaces                     FALSE
+init-command                      (No default value)
+local-infile                      FALSE
+no-beep                           FALSE
+host                              (No default value)
+html                              FALSE
+xml                               FALSE
+line-numbers                      TRUE
+unbuffered                        FALSE
+column-names                      TRUE
+sigint-ignore                     FALSE
+port                              0
+prompt                            mysql> 
+quick                             FALSE
+raw                               FALSE
+reconnect                         TRUE
+socket                            (No default value)
+ssl                               FALSE
+ssl-ca                            (No default value)
+ssl-capath                        (No default value)
+ssl-cert                          (No default value)
+ssl-cipher                        (No default value)
+ssl-key                           (No default value)
+ssl-crl                           (No default value)
+ssl-crlpath                       (No default value)
+ssl-verify-server-cert            FALSE
+table                             FALSE
+user                              (No default value)
+safe-updates                      FALSE
+i-am-a-dummy                      FALSE
+connect-timeout                   0
+max-allowed-packet                16777216
+net-buffer-length                 16384
+select-limit                      1000
+max-join-size                     1000000
+secure-auth                       TRUE
+show-warnings                     FALSE
+plugin-dir                        (No default value)
+default-auth                      (No default value)
+histignore                        (No default value)
+binary-mode                       FALSE
+connect-expired-password          FALSE
+
+
+
+查看mysql版本：select @@ version;
+SET FOREIGN_KEY_CHECKS=0;
+drop table if exists sys_interface;
+CREATE TABLE
+    sys_userrole_rel
+    (
+        user_id VARCHAR(32) NOT NULL COMMENT '用户id'，
+        role_id VARCHAR(32) NOT NULL COMMENT '角色id'，
+        PRIMARY KEY (user_id， role_id)，
+        CONSTRAINT FK_user_role FOREIGN KEY (user_id) REFERENCES sys_user_info (user_id) ，
+        CONSTRAINT FK_role_id FOREIGN KEY (role_id) REFERENCES sys_role_info (role_id)，
+        INDEX FK_role_id (role_id)
+    )
+    ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户角色关联表';
+insert into sys_userrole_rel (user_id，role_id) values ('creditquery'，'CREDIT_QUERY');
+
+连接数据库：mysql -uUSERNAME -pPassword;
+查看数据库：show databases;
+查看表：use databaseName; show tables;
+
+MySql常用命令总结  
+这两天搞个网站，又用到MySql,可是命令却一个都想不起来，所以，趁这次机会，把这些整理一下，权当作笔记吧，以便自己以后查阅！ 
+1:使用SHOW语句找出在服务器上当前存在什么数据库：  
+  mysql> SHOW DATABASES;  
+2:2、创建一个数据库MYSQLDATA 
+  mysql> CREATE DATABASE MYSQLDATA;  
+3:选择你所创建的数据库  
+  mysql> USE MYSQLDATA; (按回车键出现Database changed 时说明操作成功！) 
+4:查看现在的数据库中存在什么表  
+  mysql> SHOW TABLES; 
+5:创建一个数据库表 
+  mysql> CREATE TABLE MYTABLE (name VARCHAR(20), sex CHAR(1)); 
+
+mysql
+
+CREATE TABLE sizes ( 
+   name ENUM('small', 'medium', 'large') 
+); 
+
+转 oracle
+CREATE TABLE sizes ( 
+  name VARCHAR2(10) CHECK( name IN ('small','medium','large') ) 
+);
+与enum类型有本质的区别。enum显示为字符，存的实质是数字。应用时性能比字符类型更优。
+6:显示表的结构：  
+  mysql> DESCRIBE MYTABLE;  
+7:往表中加入记录  
+  mysql> insert into MYTABLE values ("hyq","M");  
+8:用文本方式将数据装入数据库表中（例如D:/mysql.txt） 
+  mysql> LOAD DATA LOCAL INFILE "D:/mysql.txt" INTO TABLE MYTABLE; 
+9:导入.sql文件命令（例如D:/mysql.sql） 
+  mysql>use database; 
+  mysql>source d:/mysql.sql;  
+10:删除表 
+  mysql>drop TABLE MYTABLE;  
+11:清空表 
+  mysql>delete from MYTABLE; 
+12:更新表中数据 
+  mysql>update MYTABLE set sex="f" where name='hyq'; 
+   
+   
+    
+在windows中MySql以服务形式存在，在使用前应确保此服务已经启动，未启动可用net start mysql命令启动。而Linux中启动时可用“/etc/rc.d/init.d/mysqld start"命令，注意启动者应具有管理员权限。 
+刚安装好的MySql包含一个含空密码的root帐户和一个匿名帐户，这是很大的安全隐患，对于一些重要的应用我们应将安全性尽可能提高，在这里应把匿名帐户删除、 root帐户设置密码，可用如下命令进行： 
+use mysql; 
+delete from User where User=""; 
+update User set Password=PASSWORD('newpassword') where User='root'; 
+如果要对用户所用的登录终端进行限制，可以更新User表中相应用户的Host字段，在进行了以上更改后应重新启动数据库服务，此时登录时可用如下类似命令： 
+mysql -uroot -p; 
+mysql -uroot -pnewpassword; 
+mysql mydb -uroot -p; 
+mysql mydb -uroot -pnewpassword; 
+上面命令参数是常用参数的一部分，详细情况可参考文档。此处的mydb是要登录的数据库的名称。
+在进行开发和实际应用中，用户不应该只用root用户进行连接数据库，虽然使用root用户进行测试时很方便，但会给系统带来重大安全隐患，也不利于管理技术的提高。我们给一个应用中使用的用户赋予最恰当的数据库权限。如一个只进行数据插入的用户不应赋予其删除数据的权限。MySql的用户管理是通过User表来实现的，添加新用户常用的方法有两个，一是在User表插入相应的数据行，同时设置相应的权限；二是通过GRANT命令创建具有某种权限的用户。其中GRANT的常用用法如下： 
+grant all on mydb.* to NewUserName@HostName identified by "password" ; 
+grant usage on *.* to NewUserName@HostName identified by "password"; 
+grant select,insert,update on mydb.* to NewUserName@HostName identified by "password";
+grant update,delete on mydb.TestTable to NewUserName@HostName identified by "password"; 
+若要给此用户赋予他在相应对象上的权限的管理能力，可在GRANT后面添加WITH GRANT OPTION选项。而对于用插入User表添加的用户，Password字段应用PASSWORD 函数进行更新加密，以防不轨之人窃看密码。对于那些已经不用的用户应给予清除，权限过界的用户应及时回收权限，回收权限可以通过更新User表相应字段，也可以使用REVOKE操作。 
+下面给出本人从其它资料(www.cn-java.com)获得的对常用权限的解释： 
+全局管理权限：  
+FILE: 在MySQL服务器上读写文件。  
+PROCESS: 显示或杀死属于其它用户的服务线程。  
+RELOAD: 重载访问控制表，刷新日志等。  
+SHUTDOWN: 关闭MySQL服务。 
+数据库/数据表/数据列权限：  
+ALTER: 修改已存在的数据表(例如增加/删除列)和索引。  
+CREATE: 建立新的数据库或数据表。  
+DELETE: 删除表的记录。  
+DROP: 删除数据表或数据库。  
+INDEX: 建立或删除索引。  
+INSERT: 增加表的记录。  
+SELECT: 显示/搜索表的记录。  
+UPDATE: 修改表中已存在的记录。 
+特别的权限：  
+ALL: 允许做任何事(和root一样)。  
+USAGE: 只允许登录--其它什么也不允许做。
+
+
+
+MySQL按照汉字的拼音排序 
+如果存储姓名的字段采用的是GBK字符集，那就好办了，因为GBK内码编码时本身就采用了拼音排序的方法（常用一级汉字3755个采用拼音排序，二级汉字就不是了，但考虑到人名等都是常用汉字，因此只是针对一级汉字能正确排序也够用了）。
+直接在查询语句后面 添加 order by name asc; 查询结果按照姓氏的升序排序；
+
+如果存储姓名的字段采用的是 utf8字符集，需要在排序的时候对字段进行转码；对于的代码是  order by convert(name using gbk) asc; 同样，查询的结果也是按照姓氏的升序排序；
+MYSQL数据库备份与恢复
+mysqldump -h主机名  -P端口 -u用户名 -p密码 (–database) 数据库名 > 文件名.sql
+
+备份MySQL数据库的命令
+mysqldump -hhostname -uusername -ppassword databasename > backupfile.sql
+
+备份MySQL数据库为带删除表的格式，能够让该备份覆盖已有数据库而不需要手动删除原有数据库。
+mysqldump -–add-drop-table -uusername -ppassword databasename > backupfile.sql
+
+直接将MySQL数据库压缩备份
+mysqldump -hhostname -uusername -ppassword databasename | gzip > backupfile.sql.gz
+
+备份MySQL数据库某个(些)表
+mysqldump -hhostname -uusername -ppassword databasename specific_table1 specific_table2 > backupfile.sql
+
+同时备份多个MySQL数据库
+mysqldump -hhostname -uusername -ppassword –databases databasename1 databasename2 databasename3 > multibackupfile.sql
+
+仅仅备份数据库结构
+mysqldump –no-data –databases databasename1 databasename2 databasename3 > structurebackupfile.sql
+
+备份服务器上所有数据库
+mysqldump –all-databases > allbackupfile.sql
+
+还原MySQL数据库的命令
+mysql -hhostname -uusername -ppassword databasename < backupfile.sql
+
+还原压缩的MySQL数据库
+gunzip < backupfile.sql.gz | mysql -uusername -ppassword databasename
+
+将数据库转移到新服务器
+mysqldump -uusername -ppassword databasename | mysql –host=*.*.*.* -C databasename
+
+
+JAVA代码调用命令的方法
+Process p = Runtime.getRuntime().exec("cmd /c mysqldump -h127.0.0.1 -P3306 -uroot -p123456  customer > d:/opt/customer/dbback/backupfile-1351022418812.sql");
+
+p.waitFor();// 等待编译结束
+
+int ret = p.exitValue();// 检查返回码，看编译是否出错。
+System.out.println(ret);
+
+用户权限配置
+创建用户
+命令: CREATE USER 'username'@'host' IDENTIFIED BY 'password';
+说明:username – 你将创建的用户名； host – 指定该用户在哪个主机上可以登陆，如果是本地用户可用localhost，  如 果想让该用户可以从任意远程主机登陆，可以使用通配符%； password –  该用户的登陆密码，密码可以为空，如果为空则该用户可以不需要密码登陆服务器.
+授权
+命令:GRANT privileges ON databaseName.tablename TO 'username'@'host'
+说明: privileges – 用户的操作权限，如SELECT ， INSERT ， UPDATE  等(详细列表见该文最后面).如果要授予所 的权限则使用ALL.；databaseName –  数据库名，tablename-表名，如果要授予该用户对所有数据库和表的相应操作权限则可用* 表示， 如*.*。
+例子:
+GRANT SELECT， INSERT ON test.user TO 'pig'@'%'; 
+GRANT ALL ON *.* TO 'pig'@'%';
+注意:用以上命令授权的用户不能给其它用户授权，如果想让该用户可以授权，用以下命令:
+
+
+GRANT privileges ON databasename.tablename TO 'username'@'host' WITH GRANT OPTION；
+设置与更改用户密码
+命令:SET PASSWORD FOR 'username'@'host' = PASSWORD('newpassword');
+如果是当前登陆用户用
+SET PASSWORD = PASSWORD("newpassword");
+撤销用户权限 
+命令:REVOKE privilege ON databasename.tablename FROM 'username'@'host';
+说明: privilege， databasename， tablename – 同授权部分.
+例子
+REVOKE SELECT ON *.* FROM 'pig'@'%';
+注意: 假如你在给用户’pig’@'%’授权的时候是这样的(或类似 的):GRANT SELECT ON test.user TO ‘pig’@'%’， 则在使用 REVOKE SELECT ON *.* FROM  ‘pig’@'%’;命令并不能撤销该用户对test数据库中user表的SELECT 操作. 相反，如果授权使用的是GRANT SELECT ON  *.* TO ‘pig’@'%’;则 REVOKE SELECT ON test.user FROM  ‘pig’@'%’;命令也不能撤销该用户对test数据库中user表的 Select 权限.
+
+具体信息可以用命令SHOW GRANTS FOR ‘pig’@'%’; 查看.
+
+删除用户
+命令:DROP USER ‘username’@'host’;
+
+一个典型的数据库建表，建用户过程
+grant all privileges on *.* to 'schedule'@'%' identified by 'schedule' with grant option;
+grant all privileges on *.* to 'shedule'@'localhost' identified by 'schedule' with grant option;
+
+创建用于localhost连接的用户并指定密码 
+mysql> create user 'pcom'@'localhost' identified by 'aaa7B2249'; 
+Query OK， 0 rows affected (0.00 sec) 
+      
+创建数据库 
+mysql> create database pcom default character set utf8 collate utf8_bin; 
+Query OK， 1 row affected (0.00 sec) 
+      
+给本地用户授权， 这里不需要指定密码 
+mysql> grant all on pcom.* to 'pcom'@'localhost'; 
+Query OK， 0 rows affected (0.00 sec) 
+      
+给其他IP地址下的用户授权， 注意: 这里必须指定密码， 否则就可以无密码访问 
+mysql> grant all on pcom.* to 'pcom'@'192.168.0.0/255.255.0.0' identified by 'aaa7B2249'; 
+Query OK， 0 rows affected (0.00 sec) 
+      
+同理 
+mysql> grant all on pcom.* to 'pcom'@'172.20.0.0/255.255.0.0' identified by 'aaa7B2249'; 
+Query OK， 0 rows affected (0.00 sec) 
+      
+Done!
+附表:在MySQL中的操作权限
+命令	描述
+ALTER	Allows use of ALTER TABLE. 
+ALTER ROUTINE 	Alters or drops stored routines. 
+CREATE	Allows use of CREATE TABLE. 
+CREATE ROUTINE 	Creates stored routines. 
+CREATE TEMPORARY TABLE	Allows use of CREATE TEMPORARY TABLE. 
+CREATE USER	Allows use of CREATE USER， DROP USER， RENAME USER， and REVOKE ALL PRIVILEGES. 
+CREATE VIEW	Allows use of CREATE VIEW. 
+DELETE	Allows use of DELETE. 
+DROP	Allows use of DROP TABLE. 
+EXECUTE	Allows the user to run stored routines. 
+FILE 	Allows use of SELECT… INTO OUTFILE and LOAD DATA INFILE. 
+INDEX	Allows use of CREATE INDEX and DROP INDEX. 
+INSERT	Allows use of INSERT. 
+LOCK TABLES 	Allows use of LOCK TABLES on tables for which the user also has SELECT privileges. 
+PROCESS 	Allows use of SHOW FULL PROCESSLIST. 
+RELOAD 	Allows use of FLUSH. 
+REPLICATION 	Allows the user to ask where slave or master 
+CLIENT 	servers are. 
+REPLICATION SLAVE 	Needed for replication slaves. 
+SELECT	Allows use of SELECT. 
+SHOW DATABASES 	Allows use of SHOW DATABASES. 
+SHOW VIEW	Allows use of SHOW CREATE VIEW. 
+SHUTDOWN 	Allows use of mysqladmin shutdown. 
+SUPER 	Allows use of CHANGE MASTER， KILL， PURGE MASTER LOGS， and SET GLOBAL SQL statements. Allows mysqladmin debug command. Allows one extra connection to be made if maximum connections are reached. 
+UPDATE	Allows use of UPDATE. 
+USAGE 	Allows connection without any specific privileges.
+最后不要忘记刷新数据库
+flush privileges;
+
+查询命令
+status查询状态
+mysql> status;
+--------------
+C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql.exe  Ver 14.14 Distrib 5.6.21, for Win64 (x86_64)
+
+Connection id:          13
+Current database:       mysql
+Current user:           root@localhost
+SSL:                    Not in use
+Using delimiter:        ;
+Server version:         5.6.21-log MySQL Community Server (GPL)
+Protocol version:       10
+Connection:             localhost via TCP/IP
+Server characterset:    utf8
+Db     characterset:    utf8
+Client characterset:    utf8
+Conn.  characterset:    utf8
+TCP port:               3306
+Uptime:                 8 hours 20 min 28 sec
+
+Threads: 2 Questions:154  Slow queries: 0 Opens: 71  Flush tables: 1  Open tables: 64  Queries per second avg: 0.005
+
+查看MYSQL数据库中所有用户
+mysql> SELECT DISTINCT CONCAT('User: ''',user,'''@''',host,''';') AS query FROM mysql.user;
+查看数据库中具体某个用户的权限
+mysql> show grants for 'cactiuser'@'%';  
+
+查看user表结构
+desc  mysql.user;
+
+MySQL的注释方式
+mysql 服务器支持如下几种注释方式：
+
+（1） # 到该行结束     # 这个注释直到该行结束 mysql> SELECT 1+1;
+
+（2）--  到该行结束      -- 这个注释直到该行结束
+
+        注意： -- (双长划) 注释风格要求在两个长划后至少有一个空格！
+  附加：
+
+    自MySQL3.23.3 以来，除了刚才介绍的注释风格外，还可以用两个短划线和一个空格（“-- ”）来开始注释；从这两个短划线到行的结束的所有内容都作为注释处理。有的数据库以双短划线作为注释的起始。MySQL也允许这样，但需要加一个空格以免产生混淆。例如，带有如像5--7 这样的表达式的语句有可能被认为包含一个注释，但不可能写5-- 7这样的表达式，因此，这是一个很有用的探索。然而，这仅仅是一个探索，最好不用这种风格的注释。
+
+（3）/* 行中间或多个行 */
+
+       mysql> SELECT 1+1;      mysql> SELECT 1/* 这是一个在行中间的注释 */ + 1;
+
+       mysql> SELECT 1+
+
+       /* 这是一个
+            多行注释
+            的形式
+       */
+
+      1;
+
+   单引号和双引号：被用来标志一个被引用字符串的开始，即使是在一个注释中。如果注释中的引号没有另一个引号与之配对，那和语法分析程序就不会认为注释结束。如果你以交互式运行 mysql，你会产生困惑，因为提示符从 mysql> 变为 '> 或 ">。
+
+   分号：被用于指出当前 SQL 语句的结束并且跟随它的任何东西表示下一行的开始。
+
+   自MySQL3.23 版以来，可在C 风格的注释中“隐藏” MySQL特有的关键字，注释以“/ * !”而不是以“ / *”起头。MySQL查看这种特殊类型注释的内部并使用这些关键字，但其他数据库服务器将这些关键字作为注释的一部分忽略。这样有助于编写由MySQL执行时利用MySQL特有功能的代码，而且该代码也可以不用修改就用于其他数据库服务器。下面的两条语句对于非MySQL的数据库服务器是等价的，但如果是MySQL服务器，将在第二条语句中执行一个INSERT DELAYED 操作：　
+
+
+MySql中的delimiter
+
+DROP FUNCTION IF EXISTS XXX...  
+DELIMITER  $$  
+CREATE ...  
+RETURNS ...  
+BEGIN  
+DECLARE ...;  
+...  
+RETURN ...;  
+END  
+$$  
+DELIMITER ;  
+
+其中DELIMITER 定好结束符为"$$", 然后最后又定义为";"(因为 MySQL的默认结束符为";")
+
+详细解释: 
+    DELIMITER 其实就是定义了一个语句执行的结束符，类似函数or存储过程这样的create语句由于其中包含了很多的";"，而默认MySQL的结束符就是";"，那么当我们创建的时候就会报错，有了DELIMITER 就可以告诉mysql解释器，该段命令是否已经结束了，mysql是否可以执行了。 
+      默认情况下，delimiter是分号";"。在命令行客户端中，如果有一行命令以分号结束， 那么回车后，mysql将会执行该命令。
+MySQL的基本命令
+　　[ ]中的内容为可选项
+　　--创建数据库
+mysql> create database 数据库名称
+
+　　--创建表
+　　mysql> create table 表名 (
+　　列的名字（id）类型（int（4））primary key(定义主键) auto_increment（描述 自增）,
+　　……，
+）；
+
+create table login (id int not null auto_increment,name varchar(20), password varchar(20),question varchar(50),answer varchar(50),primary key (id))
+
+　　--查看所有数据库
+mysql> show databases 数据库名称;
+
+　　--使用某个数据库
+mysql> use  数据库名称;
+
+　　--查看所使用数据库下所有的表
+mysql> show tables;
+
+　　--显示表的属性结构
+mysql> desc 表名;
+
+　　--选择表中数据的显示
+　　--  *  代表选择所有列 ，
+　　mysql> select * from 表名 where id=?[and name=？] [or name=?];
+mysql> select id,name from 表名order by 某一列的名称 desc(降序，asc为升序)
+
+　　--删除表中的数据
+mysql> delete from table where id=？[or name=? (and name=?)];
+
+　　--删除表
+mysql> drop table;
+
+　　--删除数据库
+mysql> drop database;
+
+　　索引是一种特殊的文件(InnoDB数据表上的索引是表空间的一个组成部分)，它们包含着对数据表里所有记录的引用指针。 
+注：[1]索引不是万能的！索引可以加快数据检索操作，但会使数据修改操作变慢。每修改数据记录，索引就必须刷新一次。为了在某种程序上弥补这一缺陷，许多SQL命令都有一个DELAY_KEY_WRITE项。这个选项的作用是暂时制止 MySQL在该命令每插入一条新记录和每修改一条现有之后立刻对索引进行刷新，对索引的刷新将等到全部记录插入/修改完毕之后再进行。在需要把许多新记录插入某个数据表的场合，DELAY_KEY_WRITE选项的作用将非常明显。[2]另外，索引还会在硬盘上占用相当大的空间。因此应该只为最经常查询和最经常排序的数据列建立索引。注意，如果某个数据列包含许多重复的内容，为它建立索引就没有太大的实际效果。 
+
+　　从理论上讲，完全可以为数据表里的每个字段分别建一个索引，但MySQL把同一个数据表里的索引总数限制为16个。 
+　　1. InnoDB数据表的索引 
+　　与MyISAM数据表相比，在 InnoDB数据表上，索引对InnoDB数据表的重要性要多得多。在InnoDB数据表上，索引不仅会在搜索数据记录时发挥作用，还是数据行级锁定机制的苊、基础。"数据行级锁定"的意思是指在事务操作的执行过程中锁定正在被处理的个别记录，不让其他用户进行访问。这种锁定将影响到(但不限于)SELECT...LOCK IN SHARE MODE、SELECT...FOR UPDATE命令以及INSERT、UPDATE和DELETE命令。 
+出于效率方面的考虑，InnoDB数据表的数据行级锁定实际发生在它们的索引上，而不是数据表自身上。显然，数据行级锁定机制只有在有关的数据表有一个合适的索引可供锁定的时候才能发挥效力。 
+
+　　2. 限制 
+　　如果WEHERE子句的查询条件里有不等号(WHERE coloum != ...)，MySQL将无法使用索引。　　类似地，如果WHERE子句的查询条件里使用了函数(WHERE DAY(column) = ...)，MySQL也将无法使用索引。 
+　　在JOIN操作中(需要从多个数据表提取数据时)，MySQL只有在主键和外键的数据类型相同时才能使用索引。 
+　　如果WHERE子句的查询条件里使用比较操作符LIKE和REGEXP，MySQL 只有在搜索模板的第一个字符不是通配符的情况下才能使用索引。比如说，如果查询条件是LIKE 'abc%'，MySQL将使用索引；如果查询条件是LIKE '%abc'，MySQL将不使用索引。 
+　　在ORDER BY操作中，MySQL只有在排序条件不是一个查询条件表达式的情况下才使用索引。(虽然如此，在涉及多个数据表查询里，即使有索引可用，那些索引在加快ORDER BY方面也没什么作用) 
+　　如果某个数据列里包含许多重复的值，就算为它建立了索引也不会有很好的效果。比如说，如果某个数据列里包含的净是些诸如"0/1"或"Y/N"等值，就没有必要为它创建一个索引。 　　
+
+普通索引、唯一索引和主索引 
+　　1. 普通索引 
+普通索引(由关键字KEY或INDEX定义的索引)的唯一任务是加快对数据的访问速度。因此，应该只为那些最经常出现在查询条件(WHERE column = ...)或排序条件(ORDER BY column)中的数据列创建索引。只要有可能，就应该选择一个数据最整齐、最紧凑的数据列(如一个整数类型的数据列)来创建索引。 
+
+　　2. 唯一索引 
+　　普通索引允许被索引的数据列包含重复的值。比如说，因为人有可能同名，所以同一个姓名在同一个"员工个人资料"数据表里可能出现两次或更多次。 
+如果能确定某个数据列将只包含彼此各不相同的值，在为这个数据列创建索引的时候就应该用关键字UNIQUE把它定义为一个唯一索引。这么做的好处：一是简化了MySQL对这个索引的管理工作，这个索引也因此而变得更有效率；二是 MySQL会在有新记录插入数据表时，自动检查新记录的这个字段的值是否已经在某个记录的这个字段里出现过了；如果是，MySQL将拒绝插入那条新记录。也就是说，唯一索引可以保证数据记录的唯一性。事实上，在许多场合，人们创建唯一索引的目的往往不是为了提高访问速度，而只是为了避免数据出现重复。
+
+　　3. 主索引 
+　　在前面已经反复多次强调过：必须为主键字段创建一个索引，这个索引就是所谓的"主索引"。主索引与唯一索引的唯一区别是：前者在定义时使用的关键字是PRIMARY而不是UNIQUE。 
+
+4. 外键索引 
+如果为某个外键字段定义了一个外键约束条件，MySQL就会定义一个内部索引来帮助自己以最有效率的方式去管理和使用外键约束条件。 
+
+　　5. 复合索引 
+索引可以覆盖多个数据列，如像INDEX(columnA, columnB)索引。这种索引的特点是MySQL可以有选择地使用一个这样的索引。如果查询操作只需要用到columnA数据列上的一个索引，就可以使用复合索引INDEX(columnA, columnB)。不过，这种用法仅适用于在复合索引中排列在前的数据列组合。比如说，INDEX(A, B, C)可以当做A或(A, B)的索引来使用，但不能当做B、C或(B, C)的索引来使用。 
+
+　　6. 索引的长度 
+在为CHAR和VARCHAR类型的数据列定义索引时，可以把索引的长度限制为一个给定的字符个数(这个数字必须小于这个字段所允许的最大字符个数)。这么做的好处是可以生成一个尺寸比较小、检索速度却比较快的索引文件。在绝大多数应用里，数据库中的字符串数据大都以各种各样的名字为主，把索引的长度设置为10~15个字符已经足以把搜索范围缩小到很少的几条数据记录了。
+
+在为BLOB和TEXT类型的数据列创建索引时，必须对索引的长度做出限制；MySQL所允许的最大索引jlkjljkjlj全文索引 
+
+文本字段上的普通索引只能加快对出现在字段内容最前面的字符串(也就是字段内容开头的字符)进行检索操作。如果字段里存放的是由几个、甚至是多个单词构成的较大段文字，普通索引就没什么作用了。这种检索往往以LIKE %word%的形式出现，这对MySQL来说很复杂，如果需要处理的数据量很大，响应时间就会很长。 
+
+　　这类场合正是全文索引(full-text index)可以大显身手的地方。在生成这种类型的索引时，MySQL将把在文本中出现的所有单词创建为一份清单，查询操作将根据这份清单去检索有关的数据记录。全文索引即可以随数据表一同创建，也可以等日后有必要时再使用下面这条命令添加： 
+　　ALTER TABLE tablename ADD FULLTEXT(column1, column2) 
+　　有了全文索引，就可以用SELECT查询命令去检索那些包含着一个或多个给定单词的数据记录了。下面是这类查询命令的基本语法： 
+　　SELECT * FROM tablename 
+　　WHERE MATCH(column1, column2) AGAINST('word1', 'word2', 'word3') 
+　　上面这条命令将把column1和column2字段里有word1、word2和word3的数据记录全部查询出来。 
+　　注解：InnoDB数据表不支持全文索引。 
+
+查询和索引的优化 
+　　只有当数据库里已经有了足够多的测试数据时，它的性能测试结果才有实际参考价值。如果在测试数据库里只有几百条数据记录，它们往往在执行完第一条查询命令之后就被全部加载到内存里，这将使后续的查询命令都执行得非常快--不管有没有使用索引。只有当数据库里的记录超过了1000条、数据总量也超过了MySQL服务器上的内存总量时，数据库的性能测试结果才有意义。 
+　　在不确定应该在哪些数据列上创建索引的时候，人们从EXPLAIN SELECT命令那里往往可以获得一些帮助。这其实只是简单地给一条普通的SELECT命令加一个EXPLAIN关键字作为前缀而已。有了这个关键字，MySQL将不是去执行那条SELECT命令，而是去对它进行分析。MySQL将以表格的形式把查询的执行过程和用到的索引(如果有的话)等信息列出来。 
+　　在EXPLAIN命令的输出结果里，第1列是从数据库读取的数据表的名字，它们按被读取的先后顺序排列。type列指定了本数据表与其它数据表之间的关联关系(JOIN)。在各种类型的关联关系当中，效率最高的是system，然后依次是const、eq_ref、ref、range、index和All(All的意思是：对应于上一级数据表里的每一条记录，这个数据表里的所有记录都必须被读取一遍--这种情况往往可以用一索引来避免)。 
+　　possible_keys数据列给出了MySQL在搜索数据记录时可选用的各个索引。key数据列是MySQL实际选用的索引，这个索引按字节计算的长度在key_len数据列里给出。比如说，对于一个INTEGER数据列的索引，这个字节长度将是4。如果用到了复合索引，在key_len数据列里还可以看到MySQL具体使用了它的哪些部分。作为一般规律，key_len数据列里的值越小越好(意思是更快)。 
+　　ref数据列给出了关联关系中另一个数据表里的数据列的名字。row数据列是MySQL在执行这个查询时预计会从这个数据表里读出的数据行的个数。row数据列里的所有数字的乘积可以让我们大致了解这个查询需要处理多少组合。 
+　　最后，extra数据列提供了与JOIN操作有关的更多信息，比如说，如果MySQL在执行这个查询时必须创建一个临时数据表，就会在extra列看到using temporary字样
+
+
+
+
+函数
+一、 控制流程函数
+
+　　a) CASE WHEN THEN 函数
+　　语法： CASE value WHEN [compare-value] THEN result [WHEN [compare-value] THEN result ……] [ELSE result ] END CASE WHEN [condition] THEN result [WHEN[condition] THEN result ……] [ELSE result] END ；
+　　函数用法说明：在第一个方案的返回结果中， value =compare-value 。而第二个方案的返回结果是第一种情况的真实结果。如果没有匹配的结果值，则返回结果为 ELSE 后的结果，如果没有 ELSE 部分，则返回值为 NULL
+　　b) IF 函数用法
+　　语法： IF(expr1,expr2,expr3)
+　　函数用法说明：如果 expr1 是 TRUE (expr1 <> 0 and expr1 <> NULL) ，则 IF() 的返回值为 expr2 ; 否则返回值则为 expr3 。 IF() 的返回值为数字值或字符串值，具体情况视其所在语境而定
+　　c) IFNULL 函数
+　　语法： IFNULL(expr1,expr2)
+　　函数用法说明：假如 expr1 不为 NULL ，则 IFNULL() 的返回值为 expr1 ; 否则其返回值为 expr2 。 IFNULL() 的返回值是数字或是字符串，具体情况取决于其所使用的语境
+编辑本段
+
+
+
+
+
+
+二、 字符串比较函数
+
+　　a) 函数 ascii(str)
+　　函数用法说明：返回值为字符串 str 的最左字符的数值。假如 str 为空字符串，则返回值为 0 。假如 str 为 NULL ，则返回值为 NULL 。 ASCII() 用于带有从 0 到 255 的数值的字符
+　　b) 函数 BIN(N)
+　　函数用法说明：返回值为 N 的二进制值的字符串表示，其中 N 为一个 longlong (BIGINT) 数字。这等同于 CONV(N ,10,2) 。假如 N 为 NULL ，则返回值为 NULL 。
+　　c) 函数CHAR(N ,... [USING charset ])
+　　函数用法说明： CHAR() 将每个参数 N 理解为一个整数，其返回值为一个包含这些整数的代码值所给出的字符的字符串。 NULL 值被省略。
+　　d) 函数CHAR_LENGTH(str )
+　　函数使用说明：返回值为字符串 str 的长度，长度的单位为字符。一个多字节字符算作一个单字符。对于一个 包含五个二字节字符集 , LENGTH() 返回值为 10, 而 CHAR_LENGTH() 的返回值为 5
+　　e) 函数 CHARACTER_LENGTH(str )
+　　函数使用说明： CHARACTER_LENGTH() 是 CHAR_LENGTH() 的同义词。
+　　f) 函数 COMPRESS(string_to_compress )
+　　函数使用说明： COMPRESS( 压缩一个字符串。这个函数要求 MySQL 已经用一个
+　　诸如 zlib 的压缩库压缩过。 否则，返回值始终是 NULL 。 UNCOMPRESS() 可将压缩过的字符串进行解压缩 ) 。
+　　g) 函数 CONCAT(str1 ,str2 ,...)
+　　函数使用说明：返回结果为连接参数产生的字符串。如有任何一个参数为 NULL ，则
+　　返回值为 NULL 。或许有一个或多个参数。 如果所有参数均为非二进制字符串，则结果为非二进制字符串。 如果自变量中含有任一二进制字符串，则结果为一个二进制字符串。一个数字参数被转化为与之相等的二进制字符串格式；若要避免这种情况，可使用显式类型 cast, 例如： SELECT CONCAT(CAST(int_col AS CHAR), char_col)
+　　h) 函数 CONCAT_WS(separator ,str1 ,str2 ,...)
+　　函数使用说明： CONCAT_WS() 代表 CONCAT With Separator ，是 CONCAT() 的
+　　特殊形式。 第一个参数是其它参数的分隔符。分隔符的位置放在要连接的两个字符串之间。分隔符可以是一个字符串，也可以是其它参数。如果分隔符为 NULL ，则结果为 NULL 。函数会忽略任何分隔符参数后的 NULL 值。
+　　i) 函数CONV(N from_base, to_base)
+　　函数使用说明：不同数基间转换数字。返回值为数字的 N 字符串表示，由 from_base 基转化为 to_base 基。如有任意一个参数为 NULL ，则返回值为 NULL 。自变量 N 被理解为一个整数，但是可以被指定为一个整数或字符串。最小基数为 2 ，而最大基数则为 36 。 If to_base 是一个负数，则 N 被看作一个带符号数。否则， N 被看作无符号数。 CONV() 的运行精确度为 64 比特。
+　　j) 函数 ELT(N ,str1 ,str2 ,str3 ,...)
+　　函数使用说明：若 N = 1 ，则返回值为 str1 ，若 N = 2 ，则返回值为 str2 ，以此
+　　类推。 若 N 小于 1 或大于参数的数目，则返回值为 NULL 。 ELT() 是 FIELD() 的补数
+　　k) 函数 EXPORT_SET(bits ,on ,off [,separator [,number_of_bits ]])
+　　函数使用说明： 返回值为一个字符串，其中对于 bits 值中的每个位组，可以得到
+　　一个 on 字符串，而对于每个清零比特位，可以得到一个 off 字符串。 bits 中的比特值按照从右到左的顺序接受检验 ( 由低位比特到高位比特 ) 。字符串被分隔字符串分开 ( 默认为逗号 ‘,’) ，按照从左到右的顺序被添加到结果中。 number_of_bits 会给出被检验的二进制位数 ( 默认为 64) 。
+　　l) 函数 FIELD(str, str1, str2, str3, …...)
+　　函数使用说明：返回值为 str1 , str2 , str3 ,…… 列表中的 str 指数。在找不到 str 的情况下，返回值为 0 。如果所有对于 FIELD() 的参数均为字符串，则所有参数均按照字符串进行比较。如果所有的参数均为数字，则按照数字进行比较。否则，参数按照双倍进行比较。如果 str 为 NULL ，则返回值为 0 ，原因是 NULL 不能同任何值进行同等比较。 FIELD() 是 ELT() 的补数。
+　　m) 函数FIND_IN_SET(str, strlist)
+　　函数使用说明： 假如字符串 str 在由 N 子链组成的字符串列表 strlist 中， 则返
+　　回值的范围在 1 到 N 之间 。一个字符串列表就是一个由一些被 ‘,’ 符号分开的自链组成的字符串。如果第一个参数是一个常数字符串，而第二个是 type SET 列，则 FIND_IN_SET() 函数被优化，使用比特计算。如果 str 不在 strlist 或 strlist 为空字符串，则返回值为 0 。如任意一个参数为 NULL ，则返回值为 NULL 。 这个函数在第一个参数包含一个逗号 (‘,’) 时将无法正常运行。
+　　n) 函数 FORMAT(X ,D )
+　　函数使用说明： 将 number X 设置为格式 '#,###,###.##', 以四舍五入的方式保留到小数点后 D 位 , 而返回结果为一个字符串。
+　　o) 函数 HEX(N_or_S )
+　　函数使用说明：如果N_OR_S 是一个数字，则返回一个 十六进制值 N 的 字符串表示，在这里， N 是一个longlong (BIGINT) 数。这相当于 CONV(N,10,16) 。如果N_OR_S 是一个字符串，则返回值为一个N_OR_S 的十六进制字符串表示，其中每个N_OR_S 里的每个字符被转化为两个十六进制数字。
+　　p) 函数INSTR(str,substr)
+　　函数使用说明：返回字符串 str 中子字符串的第一个出现位置。这和LOCATE() 的双参数形式相同，除非参数的顺序被颠倒。
+　　q) 函数LCASE(str)
+　　函数使用说明：LCASE() 是 LOWER() 的同义词
+　　r) 函数LEFT(str,len)
+　　函数使用说明：返回从字符串str 开始的len 最左字符
+　　s) 函数 LENGTH(str )
+　　函数使用说明： 返回值为字符串 str 的长度，单位为字节。一个多字节字符算作多字节。这意味着 对于一个包含 5 个 2 字节字符的字符串， LENGTH() 的返回值为 10, 而 CHAR_LENGTH() 的返回值则为5 。
+　　t) 函数 LOAD_FILE(file_name)
+　　函数使用说明：读取文件并将这一文件按照字符串的格式返回。 文件的位置必须在服务器上 , 你必须为文件制定路径全名，而且你还必须拥有 FILE 特许权。文件必须可读取，文件容量必须小于 max_allowed_packet 字节。若文件不存在，或因不满足上述条件而不能被读取， 则函数返回值为 NULL
+　　u) 函数 LOCATE(substr ,str ) , LOCATE(substr ,str ,pos )
+　　函数使用说明：第一个语法返回字符串 str 中子字符串substr 的第一个出现位置。第二个语法返回字符串 str 中子字符串substr 的第一个出现位置, 起始位置在pos 。如若substr 不在str 中，则返回值为0 。
+　　v) 函数LOWER(str )
+　　函数使用说明：返回字符串 str 以及所有根据最新的字符集映射表变为小写字母的字符
+　　w) 函数LPAD(str ,len ,padstr )
+　　函数使用说明：返回字符串 str , 其左边由字符串padstr 填补到len 字符长度。假如str 的长度大于len , 则返回值被缩短至 len 字符。
+　　x) 函数LTRIM(str )
+　　函数使用说明：返回字符串 str ，其引导空格字符被删除。
+　　y) 函数 MAKE_SET(bits ,str1 ,str2 ,...)
+　　函数使用说明： 返回一个设定值 ( 一个包含被 ‘,’ 号分开的字字符串的字符串 ) ，由在 bits 组中具有相应的比特的字符串组成。 str1 对应比特 0, str2 对应比特 1, 以此类推。 str1 , str2 , ... 中的 NULL 值不会被添加到结果中。
+　　z) 函数 MID(str ,pos ,len )
+　　函数使用说明： MID(str ,pos ,len ) 是 SUBSTRING(str ,pos ,len ) 的同义词。
+　　aa) 函数 OCT(N )
+　　函数使用说明：返回一个 N 的八进制值的字符串表示，其中 N 是一个 longlong (BIGINT) 数。这等同于 CONV(N,10,8) 。若 N 为 NULL ，则返回值为 NULL 。
+　　bb) 函数 OCTET_LENGTH(str )
+　　函数使用说明： OCTET_LENGTH() 是 LENGTH() 的同义词。
+　　cc) 函数ORD(str )
+　　函数使用说明：若字符串str 的最左字符是一个多字节字符，则返回该字符的代码， 代码的计算通过使用以下公式计算其组成字节的数值而得出:
+　　(1st byte code)
+　　+ (2nd byte code × 256)
+　　+ (3rd byte code × 2562
+　　) ...
+　　假如最左字符不是一个多字节字符，那么 ORD() 和函数ASCII() 返回相同的值
+　　dd) 函数 POSITION(substr IN str )
+　　函数使用说明：POSITION(substr IN str ) 是 LOCATE(substr ,str ) 同义词
+　　ee) 函数QUOTE(str )
+　　函数使用说明：引证一个字符串，由此产生一个在SQL 语句中可用作完全转义数据值的结果。 返回的字符串由单引号标注，每例都带有单引号 (‘'’) 、 反斜线符号 (‘\’) 、 ASCII NUL 以及前面有反斜线符号的Control-Z 。如果自变量的值为NULL, 则返回不带单引号的单词 “NULL” 。
+　　ff) 函数REPEAT(str ,count )
+　　函数使用说明：返回一个由重复的字符串str 组成的字符串，字符串str 的数目等于count 。 若 count <= 0, 则返回一个空字符串。若str 或 count 为 NULL ，则返回 NULL 。
+　　gg) 函数REPLACE(str ,from_str ,to_str )
+　　函数使用说明：返回字符串str 以及所有被字符串to_str 替代的字符串from_str 。
+　　hh) 函数REVERSE(str )
+　　函数使用说明：返回字符串 str ，顺序和字符顺序相反。
+　　ii) 函数RIGHT(str ,len )
+　　函数使用说明：从字符串str 开始，返回最右len 字符。
+　　jj) 函数RPAD(str ,len ,padstr )
+　　函数使用说明：返回字符串str , 其右边被字符串 padstr 填补至len 字符长度。假如字符串str 的长度大于 len , 则返回值被缩短到与 len 字符相同长度
+　　kk) 函数RTRIM(str )
+　　函数使用说明：返回字符串 str ，结尾空格字符被删去。
+　　ll) 函数 SOUNDEX(str )
+　　函数使用说明：从str 返回一个soundex 字符串。 两个具有几乎同样探测的字符串应该具有同样的 soundex 字符串。一个标准的soundex 字符串的长度为4 个字符，然而SOUNDEX() 函数会返回一个人以长度的字符串。 可使用结果中的SUBSTRING() 来得到一个标准 soundex 字符串。在str 中， 会忽略所有未按照字母顺序排列的字符。所有不在A-Z 范围之内的国际字母符号被视为元音字母。
+　　mm) 函数expr1 SOUNDS LIKE expr2
+　　函数使用说明： 这相当于SOUNDEX(expr1 ) = SOUNDEX(expr2 ) 。
+　　nn) 函数SPACE(N )
+　　函数使用说明：返回一个由N 间隔符号组成的字符串
+　　oo) 函数SUBSTRING(str ,pos ) , SUBSTRING(str FROM pos ) SUBSTRING(str ,pos ,len ) , SUBSTRING(str FROM pos FOR len )
+　　函数使用说明：不带有len 参数的格式从字符串str 返回一个子字符串，起始于位置 pos 。带有len 参数的格式从字符串str 返回一个长度同len 字符相同的子字符串，起始于位置 pos 。 使用 FROM 的格式为标准 SQL 语法。也可能对pos 使用一个负值。假若这样，则子字符串的位置起始于字符串结尾的pos 字符，而不是字符串的开头位置。在以下格式的函数中可以对pos 使用一个负值。
+　　pp) 函数SUBSTRING_INDEX(str ,delim ,count )
+　　函数使用说明：在定界符 delim 以及count 出现前，从字符串str 返回自字符串。若count 为正值, 则返回最终定界符( 从左边开始) 左边的一切内容。若count 为负值，则返回定界符（从右边开始）右边的一切内容。
+　　qq) 函数 TRIM([{BOTH | LEADING | TRAILING} [remstr ] FROM] str ) TRIM(remstr FROM] str )
+　　函数使用说明：返回字符串 str ， 其中所有remstr 前缀和/ 或后缀都已被删除。若分类符BOTH 、LEADIN 或TRAILING 中没有一个是给定的, 则假设为BOTH 。 remstr 为可选项，在未指定情况下，可删除空格
+　　rr) 函数UCASE(str)
+　　函数使用说明：UCASE() 是UPPER() 的同义词
+　　ss) 函数UNCOMPRESS(string_to_uncompress )
+　　函数使用说明：对经COMPRESS() 函数压缩后的字符串进行解压缩。若参数为压缩值，则结果为 NULL 。这个函数要求 MySQL 已被诸如zlib 之类的压缩库编译过。否则, 返回值将始终是 NULL
+　　tt) 函数 UNCOMPRESSED_LENGTH(compressed_string )
+　　函数使用说明： 返回压缩字符串压缩前的长度。
+　　uu) 函数 UNHEX(str)
+　　函数使用说明：执行从 HEX(str ) 的反向操作。就是说，它将参数中的每一对十六进制数字理解为一个数字，并将其转化为该数字代表的字符。结果字符以二进制字符串的形式返回
+　　vv) 函数 UPPER(str )
+　　函数使用说明：返回字符串 str ， 以及根据最新字符集映射转化为大写字母的字符
+编辑本段
+
+
+
+
+
+
+
+三、 数学函数
+
+　　a) 函数 ABS(X)
+　　函数使用说明：返回 X 的绝对值
+　　b) 函数 ACOS(X )
+　　函数使用说明：返回 X 反余弦 , 即 , 余弦是 X 的值。若 X 不在 -1 到 1 的范围之内，则返回 NULL 。
+　　c) 函数 ASIN （ X ）
+　　函数使用说明：返回X 的反正弦，即，正弦为X 的值。若X 若X 不在-1 到 1 的范围之内，则返回 NULL 。
+　　d) 函数ATAN(X )
+　　函数使用说明：返回 X 的反正切，即，正切为 X 的值。
+　　e) 函数 ATAN(Y ,X ) , ATAN2(Y ,X )
+　　函数使用说明：返回两个变量 X 及 Y 的反正切。 它类似于 Y 或 X 的反正切计
+　　算 , 除非两个参数的符号均用于确定结果所在象限。
+　　f) 函数 CEILING(X ) CEIL(X )
+　　函数使用说明：返回不小于 X 的最小整数值。
+　　g) 函数 COS(X )
+　　函数使用说明：返回 X 的余弦，其中 X 在弧度上已知。
+　　h) 函数 COT(X )
+　　函数使用说明：返回 X 的余切
+　　i) 函数 CRC32(expr )
+　　函数使用说明：计算循环冗余码校验值并返回一个 32 比特无符号值。若参数为 NULL ，则结果为 NULL 。该参数应为一个字符串，而且在不是字符串的情况下会被作为字符串处理（若有可能）
+　　j) 函数 DEGREES(X )
+　　函数使用说明：返回参数 X , 该参数由弧度被转化为度。
+　　k) 函数 EXP(X )
+　　函数使用说明：返回 e 的 X 乘方后的值 ( 自然对数的底 ) 。
+　　l) 函数 FLOOR(X )
+　　函数使用说明：返回不大于 X 的最大整数值 。
+　　m) 函数 FORMAT(X ,D )
+　　函数使用说明：将数字 X 的格式写成 '#,###,###.##' 格式 , 即保留小数点后 D 位，而第 D 位的保留方式为四舍五入，然后将结果以字符串的形式返回
+　　n) 函数 LN(X )
+　　函数使用说明：返回 X 的自然对数 , 即 , X 相对于基数 e 的对数
+　　o) 函数 LOG(X ) LOG(B ,X )
+　　函数使用说明：若用一个参数调用，这个函数就会返回 X 的自然对数。
+　　p) 函数 LOG2(X )
+　　函数使用说明：返回 X 的基数为 2 的对数。
+　　q) 函数 LOG10(X )
+　　函数使用说明：返回 X 的基数为 10 的对数。
+　　r) 函数 MOD(N ,M ) , N % M N MOD M
+　　函数使用说明： 模操作。返回 N 被 M 除后的余数。
+　　s) 函数 PI()
+　　函数使用说明：返回 ? (pi) 的值。默认的显示小数位数是 7 位 , 然而 MySQL 内部会使用完全双精度值。
+　　t) 函数 POW(X ,Y ) , POWER(X ,Y )
+　　函数使用说明：返回 X 的 Y 乘方的结果值。
+　　u) 函数 RADIANS(X )
+　　函数使用说明：返回由度转化为弧度的参数 X , ( 注意 ? 弧度等于 180 度）。
+　　v) 函数 RAND() RAND(N )
+　　函数使用说明：返回一个随机浮点值 v ，范围在 0 到 1 之间 ( 即 , 其范围为 0 ≤ v ≤ 1.0) 。若已指定一个整数参数 N ，则它被用作种子值，用来产生重复序列。
+　　w) 函数 ROUND(X ) ROUND(X ,D )
+　　函数使用说明：返回参数 X , 其值接近于最近似的整数。在有两个参数的情况下，返回 X ，其值保留到小数点后 D 位，而第 D 位的保留方式为四舍五入。若要接保留 X 值小数点左边的 D 位，可将 D 设为负值。
+　　x) 函数 SIGN(X )
+　　函数使用说明：返回参数作为 -1 、 0 或 1 的符号，该符号取决于 X 的值为负、零或正。
+　　y) 函数 SIN(X )
+　　函数使用说明：返回 X 正弦，其中 X 在弧度中被给定。
+　　z) 函数 SQRT(X )
+　　函数使用说明： 返回非负数 X 的二次方根。
+　　aa) 函数TAN(X )
+　　函数使用说明： 返回 X 的正切，其中 X 在弧度中被给定。
+　　bb) 函数TRUNCATE(X ,D )
+　　函数使用说明： 返回被舍去至小数点后 D 位的数字 X 。若 D 的值为 0, 则结果
+　　不带有小数点或不带有小数部分。可以将 D 设为负数 , 若要截去 ( 归零 ) X 小数点左起第 D 位开始后面所有低位的值
+
+
+
+
+
+四、日期和时间函数
+
+　　a) 函数ADDDATE(date ,INTERVAL expr type ) ADDDATE(expr ,days )
+　　函数使用说明： 当被第二个参数的 INTERVAL 格式激活后， ADDDATE() 就是 DATE_ADD() 的同义词。相关函数 SUBDATE() 则是 DATE_SUB() 的同义词。对于 INTERVAL 参数上的信息 ，请参见关于 DATE_ADD() 的论述。
+　　b) 函数 ADDTIME(expr ,expr2 )
+　　函数使用说明： ADDTIME() 将 expr2 添加至 expr 然后返回结果。 expr 是一个时间或时间日期表达式，而 expr2 是一个时间表达式。
+　　c) 函数 CONVERT_TZ(dt ,from_tz ,to_tz )
+　　函数使用说明： CONVERT_TZ() 将时间日期值 dt 从 from_tz 给出的时区转到 to_tz 给出的时区，然后返回结果值。关于可能指定的时区的详细论述，若自变量无效，则这个函数会返回 NULL
+
+　　d) 函数 CURDATE()
+　　函数使用说明：将当前日期按照 'YYYY-MM-DD' 或 YYYYMMDD 格式的值返回，具体格式根据函数用在字符串或是数字语境中而定。
+
+　　e) 函数 CURRENT_DATE CURRENT_DATE()
+　　函数使用说明： CURRENT_DATE 和 CURRENT_DATE() 是的同义词 .
+
+　　f) 函数 CURTIME()
+　　函数使用说明： 将当前时间以 'HH:MM:SS' 或 HHMMSS 的格式返回， 具体格式根据函数用在字符串或是数字语境中而定。
+　　g) 函数 CURRENT_TIME, CURRENT_TIME()
+　　函数使用说明： CURRENT_TIME 和 CURRENT_TIME() 是 CURTIME() 的同义词。
+　　h) 函数 CURRENT_TIMESTAMP, CURRENT_TIMESTAMP()
+　　函数使用说明： CURRENT_TIMESTAMP 和 CURRENT_TIMESTAMP() 是 NOW() 的同义词
+
+　　i) 函数 DATE(expr )
+　　函数使用说明： 提取日期或时间日期表达式 expr 中的日期部分。
+
+　　j) 函数 DATEDIFF(expr ,expr2 )
+　　函数使用说明： DATEDIFF() 返回起始时间 expr 和结束时间 expr2 之间的天数。 Expr 和 expr2 为日期或 date-and-time 表达式。计算中只用到这些值的日期部分。
+　　k) 函数 DATE_ADD(date ,INTERVAL expr type ) DATE_SUB(date ,INTERVAL expr type )
+　　函数使用说明：这些函数执行日期运算。 date 是一个 DATETIME 或 DATE 值，用来指定起始时间。 expr 是一个表达式，用来指定从起始日期添加或减去的时间间隔值。 Expr 是一个字符串 ; 对于负值的时间间隔，它可以以一个 ‘-’ 开头。 type 为关键词，它指示了表达式被解释的方式。
+　　l) 函数 DATE_FORMAT(date ,format )
+　　函数使用说明：根据 format 字符串安排 date 值的格式。
+　　m) 函数 DAY(date )
+　　函数使用说明： DAY() 和 DAYOFMONTH() 的意义相同
+　　n) 函数 DAYNAME(date )
+　　函数使用说明：返回 date 对应的工作日名称。
+　　o) 函数 DAYOFMONTH(date )
+　　函数使用说明：返回 date 对应的该月日期，范围是从 1 到 31
+　　p) 函数 DAYOFWEEK(date )
+　　函数使用说明：返回 date (1 = 周日 , 2 = 周一 , ..., 7 = 周六 ) 对应的工作日索引。这些索引值符合 ODBC 标准
+　　q) 函数 DAYOFYEAR(date )
+　　函数使用说明：返回date 对应的一年中的天数，范围是从 1 到366 。
+　　r) 函数 EXTRACT(type FROM date )
+　　函数使用说明： EXTRACT() 函数所使用的时间间隔类型说明符同 DATE_ADD() 或 DATE_SUB() 的相同 , 但它从日期中提取其部分，而不是执行日期运算。
+　　s) 函数FROM_DAYS(N )
+　　函数使用说明： 给定一个天数 N , 返回一个 DATE 值。
+　　t) 函数 FROM_UNIXTIME(unix_timestamp )ROM_UNIXTIME(unix_timestamp ,format )
+　　函数使用说明：返回'YYYY-MM-DD HH:MM:SS' 或YYYYMMDDHHMMSS 格式值的unix_timestamp 参数表示，具体格式取决于该函数是否用在字符串中或是数字语境中。 若format 已经给出，则结果的格式是根据format 字符串而定。 format 可以包含同DATE_FORMAT() 函数输入项列表中相同的说明符。
+　　u) 函数 GET_FORMAT(DATE|TIME|DATETIME, 'EUR'|'USA'|'JIS'|'ISO'|'INTERNAL')
+　　函数使用说明：返回一个格式字符串。这个函数在同 DATE_FORMAT() 及 STR_TO_DATE() 函数结合时很有用
+　　v) 函数 HOUR(time )
+　　函数使用说明：返回 time 对应的小时数。对于日时值的返回值范围是从 0 到 23
+　　w) 函数 LAST_DAY(date )
+　　函数使用说明：获取一个日期或日期时间值，返回该月最后一天对应的值。若参数无效，则返回 NULL 。
+　　x) 函数 LOCALTIME, LOCALTIME()
+　　函数使用说明： LOCALTIME 及 LOCALTIME() 和 NOW() 具有相同意义。
+　　y) 函数 LOCALTIMESTAMP, LOCALTIMESTAMP()
+　　函数使用说明： LOCALTIMESTAMP 和 LOCALTIMESTAMP() 和 NOW() 具有相同意义。
+　　z) 函数 MAKEDATE(year ,dayofyear )
+　　函数使用说明：给出年份值和一年中的天数值，返回一个日期。 dayofyear 必须大于 0 ，否则结果为 NULL 。
+　　aa) 函数 MAKETIME(hour ,minute ,second )
+　　函数使用说明： 返回由 hour 、 minute 和 second 参数计算得出的时间值
+　　bb) 函数 CROSECOND(expr )
+　　函数使用说明：从时间或日期时间表达式 expr 返回微秒值，其数字范围从 0 到 999999 。
+　　cc) 函数 MINUTE(time )
+　　函数使用说明：返回 time 对应的分钟数 , 范围是从 0 到 59 。
+　　dd) 函数 MONTH(date )
+　　函数使用说明：返回 date 对应的月份，范围时从 1 到 12 。
+　　ee) 函数 MONTHNAME(date )
+　　函数使用说明： 返回 date 对应月份的全名
+　　ff) 函数 NOW()
+　　函数使用说明：返回当前日期和时间值，其格式为 'YYYY-MM-DD HH:MM:SS' 或 YYYYMMDDHHMMSS ， 具体格式取决于该函数是否用在字符串中或数字语境中。
+　　gg) 函数 PERIOD_ADD(P ,N )
+　　函数使用说明：添加 N 个月至周期 P ( 格式为 YYMM 或 YYYYMM) ，返回值的格式为 YYYYMM 。注意周期参数 P 不是 日期值。
+　　hh) 函数 PERIOD_DIFF(P1 ,P2 )
+　　函数使用说明：返回周期 P1 和 P2 之间的月份数。 P1 和 P2 的格式应该为 YYMM 或 YYYYMM 。注意周期参数 P1 和 P2 不是 日期值。
+　　ii) 函数 QUARTER(date )
+　　函数使用说明：返回 date 对应的一年中的季度值，范围是从 1 到 4
+　　jj) 函数 SECOND(time )
+　　函数使用说明：返回 time 对应的秒数 , 范围是从 0 到 59 。
+　　kk) 函数 SEC_TO_TIME(seconds )
+　　函数使用说明： 返回被转化为小时、 分钟和秒数的 seconds 参数值 , 其格式为 'HH:MM:SS' 或 HHMMSS ，具体格式根据该函数是否用在字符串或数字语境中而定
+　　ll) 函数 STR_TO_DATE(str ,format )
+　　函数使用说明：这是 DATE_FORMAT() 函数的倒转。它获取一个字符串 str 和一个格式字符串 format 。若格式字符串包含日期和时间部分，则 STR_TO_DATE() 返回一个 DATETIME 值， 若该字符串只包含日期部分或时间部分，则返回一个 DATE 或 TIME 值。
+　　mm) 函数 SUBDATE(date ,INTERVAL expr type ) SUBDATE(expr ,days )
+　　函数使用说明：当被第二个参数的 INTERVAL 型式调用时 , SUBDATE() 和 DATE_SUB() 的意义相同。对于有关 INTERVAL 参数的信息， 见有关 DATE_ADD() 的讨论。
+　　nn) 函数 SUBTIME(expr ,expr2 )
+　　函数使用说明： SUBTIME() 从 expr 中提取 expr2 ，然后返回结果。 expr 是一个时间或日期时间表达式，而 xpr2 是一个时间表达式。
+　　oo) 函数 SYSDATE()
+　　函数使用说明：返回当前日期和时间值，格式为 'YYYY-MM-DD HH:MM:SS' 或 YYYYMMDDHHMMSS ， 具体格式根据函数是否用在字符串或数字语境而定。
+　　pp) 函数 TIME(expr )
+　　函数使用说明：提取一个时间或日期时间表达式的时间部分，并将其以字符串形式返回。
+　　qq) 函数 TIMEDIFF(expr ,expr2 )
+　　函数使用说明： TIMEDIFF() 返回起始时间 expr 和结束时间 expr2 之间的时间。 expr 和 expr2 为时间或 date-and-time 表达式 , 两个的类型必须一样。
+　　rr) 函数TIMESTAMP(expr ) , TIMESTAMP(expr ,expr2 )
+　　函数使用说明： 对于一个单参数 , 该函数将日期或日期时间表达式 expr 作为日期时间值返回 . 对于两个参数 , 它将时间表达式 expr2 添加到日期或日期时间表达式 expr 中，将 theresult 作为日期时间值返回。
+　　ss) 函数 TIMESTAMPADD(interval ,int_expr ,datetime_expr )
+　　函数使用说明：将整型表达式int_expr 添加到日期或日期时间表达式 datetime_expr 中。 int_expr 的单位被时间间隔参数给定，该参数必须是以下值的其中一个： FRAC_SECOND 、SECOND 、 MINUTE 、 HOUR 、 DAY 、 WEEK 、 MONTH 、 QUARTER 或 YEAR 。可使用所显示的关键词指定Interval 值，或使用SQL_TSI_ 前缀。例如, DAY 或SQL_TSI_DAY 都是正确的
+　　tt) 函数 TIMESTAMPDIFF(interval ,datetime_expr1 ,datetime_expr2 )
+　　函数使用说明：返回日期或日期时间表达式 datetime_expr1 和 datetime_expr2 the 之间的整数差。其结果的单位由 interval 参数给出。 interval 的法定值同 TIMESTAMPADD() 函数说明中所列出的相同。
+　　uu) 函数 TIME_FORMAT(time ,format )
+　　函数使用说明：其使用和 DATE_FORMAT() 函数相同 , 然而 format 字符串可能仅会包含处理小时、分钟和秒的格式说明符。其它说明符产生一个 NULL 值或 0 。
+　　vv) 函数 TIME_TO_SEC(time )
+　　函数使用说明：返回已转化为秒的 time 参数
+　　ww) 函数 TO_DAYS(date )
+　　函数使用说明：给定一个日期 date , 返回一个天数 ( 从年份 0 开始的天数 ) 。
+　　xx) 函数 UNIX_TIMESTAMP(), UNIX_TIMESTAMP(date )
+　　函数使用说明：若无参数调用，则返回一个 Unix timestamp ('1970-01-01 00:00:00' GMT 之后的秒数 ) 作为无符号整数。若用 date 来调用 UNIX_TIMESTAMP() ，它会将参数值以 '1970-01-01 00:00:00' GMT 后的秒数的形式返回。 date 可以是一个 DATE 字符串、一个 DATETIME 字符串、一个 TIMESTAMP 或一个当地时间的 YYMMDD 或 YYYMMDD 格式的数字。
+　　yy) 函数 UTC_DATE, UTC_DATE()
+　　函数使用说明：返回当前 UTC 日期值，其格式为 'YYYY-MM-DD' 或 YYYYMMDD ，具体格式取决于函数是否用在字符串或数字语境中。
+　　zz) 函数 UTC_TIME, UTC_TIME()
+　　函数使用说明：返回当前 UTC 值，其格式为 'HH:MM:SS' 或 HHMMSS ，具体格式根据该函数是否用在字符串或数字语境而定。
+　　aaa) 函数 UTC_TIMESTAMP, UTC_TIMESTAMP()
+　　函数使用说明：返回当前 UTC 日期及时间值，格式为 'YYYY-MM-DD HH:MM:SS' 或 YYYYMMDDHHMMSS ，具体格式根据该函数是否用在字符串或数字语境而定
+　　bbb) 函数 WEEK(date [,mode ])
+　　函数使用说明：该函数返回 date 对应的星期数。 WEEK() 的双参数形式允许你指定该星期是否起始于周日或周一， 以及返回值的范围是否为从 0 到 53 或从 1 到 53 。若 mode 参数被省略，则使用 default_week_format 系统自变量的值。
+　　ccc) 函数 WEEKDAY(date )
+　　函数使用说明：返回 date (0 = 周一 , 1 = 周二 , ... 6 = 周日 ) 对应的工作日索引 weekday index for
+　　ddd) 函数 WEEKOFYEAR(date )
+　　函数使用说明：将该日期的阳历周以数字形式返回，范围是从 1 到 53 。它是一个兼容度函数，相当于 WEEK(date ,3) 。
+　　eee) 函数 YEAR(date )
+　　函数使用说明：返回 date 对应的年份 , 范围是从 1000 到 9999 。
+　　fff) 函数 YEARWEEK(date ), YEARWEEK(date ,start )
+　　函数使用说明：返回一个日期对应的年或周。 start 参数的工作同 start 参数对 WEEK() 的工作相同。结果中的年份可以和该年的第一周和最后一周对应的日期参数有所不同。
+
+
+
+
+
+
+
+
+
+
+五、 全文搜索功能函数
+
+　　a) 函数 MATCH (col1,col2,...) AGAINST (expr [IN BOOLEAN MODE | WITH QUERY EXPANSION])
+编辑本段
+
+
+
+
+
+
+
+
+
+
+六、 加密函数
+
+　　a) 函数 AES_ENCRYPT(str ,key_str ) , AES_DECRYPT(crypt_str ,key_str )
+　　函数使用说明：这些函数允许使用官方 AES 进行加密和数据加密 ( 高级加密标准 ) 算法 , 即以前人们所熟知的 “Rijndael” 。 保密关键字的长度为 128 比特，不过你可以通过改变源而将其延长到 256 比特。我们选择了 128 比特的原因是它的速度要快得多，且对于大多数用途而言这个保密程度已经够用。
+　　b) 函数DECODE(crypt_str ,pass_str )
+　　函数使用说明：使用 pass_str 作为密码，解密加密字符串 crypt_str ， crypt_str 应该是由 ENCODE() 返回的字符串。
+　　c) 函数 ENCODE(str ,pass_str )
+　　函数使用说明：使用 pass_str 作为密码，解密 str 。 使用 DECODE() 解密结果。
+　　d) 函数 DES_DECRYPT(crypt_str [,key_str ])
+　　函数使用说明：使用 DES_ENCRYPT() 加密一个字符串。若出现错误，这个函数会返回 NULL 。
+　　e) 函数 DES_ENCRYPT(str [,(key_num |key_str )])
+　　函数使用说明：用 Triple-DES 算法给出的关键字加密字符串。若出现错误，这个函数会返回 NULL 。
+　　f) 函数 ENCRYPT(str [,salt ])
+　　函数使用说明：使用 Unix crypt() 系统调用加密 str 。 salt 参数应为一个至少包含 2 个字符的字符串。若没有给出 salt 参数，则使用任意值。
+　　g) 函数 MD5(str )
+　　函数使用说明：为字符串算出一个 MD5 128 比特检查和。该值以 32 位十六进制数字的二进制字符串的形式返回 , 若参数为 NULL 则会返回 NULL 。例如，返回值可被用作散列关键字
+　　h) 函数 OLD_PASSWORD(str )
+　　函数使用说明：当 PASSWORD() 的执行变为改善安全性时， OLD_PASSWORD() 会被添加到 MySQL 。 OLD_PASSWORD() 返回从前的 PASSWORD() 执行值 ( 4.1 之前 ) ，同时允许你为任何 4.1 之前的需要连接到你的 5.1 版本 MySQL 服务器前客户端设置密码，从而不至于将它们切断
+　　i) 函数PASSWORD(str )
+　　函数使用说明：从原文密码str 计算并返回密码字符串，当参数为 NULL 时返回 NULL 。这个函数用于用户授权表的Password 列中的加密MySQL 密码存储
+编辑本段
+
+
+
+
+
+
+七、 信息函数
+
+　　a) 函数 BENCHMARK(count ,expr )
+　　函数使用说明： BENCHMARK() 函数重复 count 次执行表达式 expr 。 它可以被用于计算 MySQL 处理表达式的速度。结果值通常为 0 。另一种用处来自 mysql 客户端内部 , 能够报告问询执行的次数
+　　b) 函数 CHARSET(str )
+　　函数使用说明：返回字符串自变量的字符集。
+　　c) 函数 COERCIBILITY(str )
+　　函数使用说明：返回字符串自变量的整序可压缩性值。
+　　d) 函数 COLLATION(str )
+　　函数使用说明：返回惠字符串参数的排序方式。
+　　e) 函数 CONNECTION_ID()
+　　函数使用说明：返回对于连接的连接 ID ( 线程 ID) 。每个连接都有各自的唯一 ID 。
+　　f) 函数 CURRENT_USER, CURRENT_USER()
+　　函数使用说明：返回当前话路被验证的用户名和主机名组合。这个值符合确定你的存取权限的 MySQL 账户。在被指定 SQL SECURITY DEFINER 特征的存储程序内， CURRENT_USER() 返回程序的创建者
+　　g) 函数 DATABASE()
+　　函数使用说明：返回使用 utf8 字符集的默认 ( 当前 ) 数据库名。在存储程序里，默认数据库是同该程序向关联的数据库，但并不一定与调用语境的默认数据库相同。
+　　h) 函数 FOUND_ROWS()
+　　函数使用说明： A SELECT 语句可能包括一个 LIMIT 子句，用来限制服务器返回客户端的行数。在有些情况下，需要不用再次运行该语句而得知在没有 LIMIT 时到底该语句返回了多少行。
+		为了知道这个行数 , 包括在 SELECT 语句中选择 SQL_CALC_FOUND_ROWS ，随后调用 FOUND_ROWS()
+		
+		limit关键字的用法：LIMIT [offset,] rows
+		offset指定要返回的第一行的偏移量，rows第二个指定返回行的最大数目。初始行的偏移量是0(不是1)。
+		取前5条数据  select * from table_name limit 0,5  
+		取第11条到第15条数据，共5条  select * from table_name limit 10,5  
+		
+　　i) 函数 LAST_INSERT_ID() LAST_INSERT_ID(expr )
+　　函数使用说明：自动返回最后一个 INSERT 或 UPDATE 问询为 AUTO_INCREMENT 列设置的第一个 发生的值。
+　　j) 函数 ROW_COUNT()
+　　函数使用说明： ROW_COUNT() 返回被前面语句升级的、插入的或删除的行数。 这个行数和 mysql 客户端显示的行数及 mysql_affected_rows() C API 函数返回的值相同。
+　　k) 函数 SCHEMA()
+　　函数使用说明：这个函数和 DATABASE() 具有相同的意义
+　　l) 函数 SESSION_USER()
+　　函数使用说明： SESSION_USER() 和 USER() 具有相同的意义。
+　　m) 函数 SYSTEM_USER()
+　　函数使用说明： SYSTEM_USER() 合 USER() 具有相同的意义
+　　n) 函数 USER()
+　　函数使用说明：返回当前 MySQL 用户名和机主名
+　　o) 函数 VERSION()
+　　函数使用说明：返回指示 MySQL 服务器版本的字符串。这个字符串使用 utf8 字符集。
+编辑本段
+
+
+
+
+
+
+八、 其他函数
+
+　　a) 函数 DEFAULT(col_name )
+　　函数使用说明：返回一个表列的默认值。若该列没有默认值则会产生错误。
+　　b) 函数 FORMAT(X ,D )
+　　函数使用说明：将数字 X 的格式写为 '#,###,###.##', 以四舍五入的方式保留小数点后 D 位， 并将结果以字符串的形式返回。若 D 为 0, 则返回结果不带有小数点，或不含小数部分。
+　　c) 函数 GET_LOCK(str ,timeout )
+　　函数使用说明：设法使用字符串 str 给定的名字得到一个锁， 超时为 timeout 秒。若成功得到锁，则返回 1 ，若操作超时则返回 0 ( 例如 , 由于另一个客户端已提前封锁了这个名字 ), 若发生错误则返回 NULL ( 诸如缺乏记忆或线程 mysqladmin kill 被断开 ) 。假如你有一个用 GET_LOCK() 得到的锁，当你执行 RELEASE_LOCK() 或你的连接断开 ( 正常或非正常 ) 时，这个锁就会解除
+　　d) 函数 INET_ATON(expr )
+　　函数使用说明：给出一个作为字符串的网络地址的点地址表示，返回一个代表该地址数值的整数。地址可以是 4 或 8 比特地址。
+　　e) 函数 INET_NTOA(expr )
+　　函数使用说明：给定一个数字网络地址 (4 或 8 比特 ), 返回作为字符串的该地址的电地址表示
+　　f) 函数 IS_FREE_LOCK(str )
+　　函数使用说明：检查名为 str 的锁是否可以使用 ( 换言之 , 没有被封锁 ) 。若锁可以使用，则返回 1 ( 没有人在用这个锁 ), 若这个锁正在被使用，则返回 0 ，出现错误则返回 NULL ( 诸如不正确的参数 ) 。
+　　g) 函数 IS_USED_LOCK(str )
+　　函数使用说明：检查名为 str 的锁是否正在被使用 ( 换言之 , 被封锁 ) 。若被封锁，则返回使用该锁的客户端的连接标识符。否则返回 NULL 。
+　　h) 函数 MASTER_POS_WAIT(log_name ,log_pos [,timeout ])
+　　函数使用说明：该函数对于控制主从同步很有用处。它会持续封锁，直到从设备阅读和应用主机记录中所有补充资料到指定的位置。返回值是其为到达指定位置而必须等待的记录事件的数目。若从设备 SQL 线程没有被启动、从设备主机信息尚未初始化、参数不正确或出现任何错误，则该函数返回 NULL 。若超时时间被超过，则返回 -1 。若在 MASTER_POS_WAIT() 等待期间，从设备 SQL 线程中止，则该函数返回 NULL 。若从设备由指定位置通过，则函数会立即返回结果。
+　　i) 函数 NAME_CONST(name ,value )
+　　函数使用说明：返回给定值。 当用来产生一个结果集合列时 , NAME_CONST() 促使该列使用给定名称。
+　　j) 函数 RELEASE_LOCK(str )
+　　函数使用说明：解开被 GET_LOCK() 获取的，用字符串 str 所命名的锁。若锁被解开，则返回 1 ，若改线程尚未创建锁，则返回 0 ( 此时锁没有被解开 ), 若命名的锁不存在，则返回 NULL 。若该锁从未被对 GET_LOCK() 的调用获取，或锁已经被提前解开，则该锁不存在。
+　　k) 函数 SLEEP(duration )
+　　函数使用说明：睡眠 ( 暂停 ) 时间为 duration 参数给定的秒数，然后返回 0 。若 SLEEP() 被中断 , 它会返回 1 。 duration 或许或包括一个给定的以微秒为单位的分数部分。
+　　l) 函数 UUID()
+　　函数使用说明：返回一个通用唯一标识符 (UUID) ， UUID 被设计成一个在时间和空间上都独一无二的数字。 2 个对 UUID() 的调用应产生 2 个不同的值，即使这些调用的执行是在两个互不相连的单独电脑上进行。
+　　m) 函数 VALUES(col_name )
+　　函数使用说明：在一个 INSERT … ON DUPLICATE KEY UPDATE … 语句中，你可以在 UPDATE 子句中使用 VALUES(col_name ) 函数，用来访问来自该语句的 INSERT 部分的列值。换言之， UPDATE 子句中的 VALUES(col_name ) 访问需要被插入的 col_name 的值 , 并不会发生重复键冲突。这个函数在多行插入中特别有用。 VALUES() 函数只在 INSERT ... UPDATE 语句中有意义，而在其它情况下只会返回 NULL
+　　
+
+
+
+
+
+九、 聚合函数
+　　a) 函数 AVG([DISTINCT] expr )
+　　函数使用说明：返回 expr 的平均值。 DISTINCT 选项可用于返回 expr 的不同值的平均值。
+　　b) 函数 BIT_AND(expr )
+　　函数使用说明：返回expr 中所有比特的 bitwise AND 。计算执行的精确度为64 比特(BIGINT) 。若找不到匹配的行，则这个函数返回18446744073709551615 。( 这是无符号 BIGINT 值，所有比特被设置为 1 ）。
+　　c) 函数 BIT_OR(expr )
+　　函数使用说明：返回expr 中所有比特的bitwise OR 。计算执行的精确度为64 比特(BIGINT) 。若找不到匹配的行，则函数返回 0 。
+　　d) 函数BIT_XOR(expr )
+　　函数使用说明：返回expr 中所有比特的bitwise XOR 。计算执行的精确度为64 比特(BIGINT) 。若找不到匹配的行，则函数返回 0 。
+　　e) 函数 COUNT(expr )
+　　函数使用说明：返回SELECT 语句检索到的行中非NULL 值的数目。若找不到匹配的行，则COUNT() 返回 0
+　　f) 函数 COUNT(DISTINCT expr ,[expr ...])
+　　函数使用说明：返回不同的非NULL 值数目。若找不到匹配的项，则COUNT(DISTINCT) 返回 0
+　　g) 函数 GROUP_CONCAT(expr )
+　　函数使用说明：该函数返回带有来自一个组的连接的非NULL 值的字符串结果。其完整的语法如下所示：
+　　GROUP_CONCAT([DISTINCT] expr [,expr ...] [ORDER BY {unsigned_integer | col_name | expr }
+　　[ASC | DESC] [,col_name ...]]
+　　[SEPARATOR str_val ])
+　　h) 函数 MIN([DISTINCT] expr ), MAX([DISTINCT] expr )
+　　函数使用说明：返回 expr 的最小值和最大值。 MIN() 和 MAX() 的取值可以是一个字符串参数；在这些情况下， 它们返回最小或最大字符串值。
+　　i) 函数 STD(expr ) STDDEV(expr )
+　　函数使用说明：返回 expr 的总体标准偏差。这是标准 SQL 的延伸。这个函数的 STDDEV() 形式用来提供和 Oracle 的兼容性。可使用标准 SQL 函数 STDDEV_POP() 进行代替
+　　j) 函数 STDDEV_POP(expr )
+　　函数使用说明：返回expr 的总体标准偏差(VAR_POP() 的平方根) 。你也可以使用 STD() 或STDDEV(), 它们具有相同的意义，然而不是标准的 SQL 。若找不到匹配的行，则STDDEV_POP() 返回 NULL
+　　k) 函数 STDDEV_SAMP(expr )
+　　函数使用说明：返回expr 的样本标准差 ( VAR_SAMP() 的平方根) 。若找不到匹配的行，则STDDEV_SAMP() 返回 NULL
+　　l) 函数 SUM([DISTINCT] expr )
+　　函数使用说明：返回expr 的总数。 若返回集合中无任何行，则 SUM() 返回NULL 。DISTINCT 关键词可用于 MySQL 5.1 中，求得expr 不同值的总和。 若找不到匹配的行，则SUM() 返回 NULL
+　　m) 函数 VAR_POP(expr )
+　　函数使用说明：返回 expr 总体标准方差。它将行视为总体，而不是一个样本， 所以它将行数作为分母。你也可以使用 VARIANCE(), 它具有相同的意义然而不是 标准的 SQL
+　　n) 函数 VAR_SAMP(expr )
+　　函数使用说明：返回expr 的样本方差。更确切的说，分母的数字是行数减去1 。若找不到匹配的行，则VAR_SAMP() 返回NULL
+　　o) 函数VARIANCE(expr )
+函数使用说明：返回expr 的总体标准方差。这是标准SQL 的延伸。可使用标准SQL 函数 VAR_POP() 进行代替。若找不到匹配的项，则VARIANCE() 返回NULL
+
+
+
+
+int类型占4个字节，tinyint占1个字节。int(1) 和 int(4) 从本身长度还是存储方式上都是一样的，区别就是显示的长度不同，但是要设置一个参数：如果列制定了zerofill 就会用0填充显示，int(4)指定后就会显示为0002。
+注意数字类型后面括号中的数字，不表示长度，表示的是显示宽度，这点与 varchar、char 后面的数字含义是不同的。
+tinyint一个字节   smallint  两个字节   MEDIUMINT三个字节 
+
+MySQL数据类型简介
+其中的长度以字节为单位
+名称	长度	用法
+TINYINT(M)
+ 
+BIT,BOOL,BOOLEAN
+ 	1
+ 	如果为无符号数，可以存储从0到255的数;
+ 
+否则可以存储从-128到127的数。
+ 
+SMALLINT(M)
+ 	2
+ 	如果为无符号数，可以存储从0到65535的数;
+ 
+否则可以存储从-32768到32767的数。
+ 
+MEDIUMINT(M)
+ 	3
+ 	如果为无符号数，可以存储从0到16777215的数;否则可以存储从-8388608到8388607的数
+ 
+INT(M)
+ 
+INTEGER(M)
+ 	4
+ 	如果为无符号数，可以存储从0到4294967295的数，否则可以存储从-2147483648到2147483647的数。
+ 
+BIGINT(M)
+ 	8
+ 	如果为无符号数，可以存储从0到18446744073709551615的数，否则可以存储从-9223372036854775808到9223372036854775807的数。
+ 
+FLOAT(precision)
+ 	4或8
+ 	这里的precision是可以直达53的整数。如果precision<=24则转换为FLOAT，如果precision>24并且precision<=53则转换为DOUBLE。
+ 
+FLOAT(M,D)
+ 	4
+ 	单精度浮点数。
+ 
+DOUBLE(M,D),
+ 
+DOUBLE PRECISION,
+ 
+REAL	8
+ 	双精度浮点。
+ 
+DECIMAL(M,D),
+ 
+DEC,NUMERIC,FIXED
+ 	M+1或M+2
+ 	未打包的浮点数。
+ 
+DATE
+ 	3
+ 	以YYYY-MM-DD的格式显示。
+ 
+datetime
+（1）8个字节储存
+（2）与时区无关
+（3）以'YYYY-MM-DD HH:MM:SS'格式检索和显示DATETIME值。支持的范围为'1000-01-01 00:00:00'到'9999-12-31 23:59:59'
+ 
+ 
+ 
+ 
+TIMESTAMP
+（1）4个字节储存
+（2）值以UTC格式保存
+（3）时区转化 ，存储时对当前的时区进行转换，检索时再转换回当前的时区。
+（4）TIMESTAMP值不能早于1970或晚于2037
+ 
+TIME
+ 	3
+ 	以HH:MM:SS的格式显示。
+ 
+YEAR
+ 	1
+ 	以YYYY的格式显示。
+ 
+CHAR(M)
+ 	M
+ 	定长字符串。
+ 
+VARCHAR(M)
+ 	最大M
+ 	变长字符串。M<=255.
+ 
+TINYBLOB,
+ 
+TINYTEXT
+ 	最大255
+ 	TINYBLOB为大小写敏感，而TINYTEXT不是大小写敏感的。
+ 
+BLOB,
+ 
+TEXT 	最大64K 	BLOB为大小敏感的，而TEXT不是大小写敏感的。
+ 
+MEDIUMBLOB,
+ 
+MEDIUMTEXT
+ 	最大16M
+ 	MEDIUMBLOB为大小写敏感的，而MEDIUMTEXT不是大小敏感的。
+ 
+LONGBLOB,
+ 
+LONGTEXT
+ 	最大4G
+ 	LONGBLOB为大小敏感的，而LONGTEXT不是大小敏感的。
+ 
+ENUM(VALUE1,….)
+ 	1或2
+ 	最大可达65535个不同的值。
+ 
+SET(VALUE1,….)
+ 	可达8
+ 	最大可达64个不同的值。
+ 
+
+
+
+
+
+
+
+
+
+
+集群环境的mysql安装及其配置
+mysql卸载
+使用root用户登陆hyname02执行以下命令。
+使用的mysql安装文件为提供的
+MySQL-server-5.5.28-1.linux2.6.x86_64.rpm，MySQL-client-5.5.28-1.linux2.6.x86_64.rpm
+删除历史mysql包
+?	查看相关mysql包
+#rpm -qa|grep -i mysql
+?	删除mysql相关包
+删除命令：rpm -e --nodeps 包名
+# rpm -e --nodeps mysql-libs-5.1.66-2.el6_3.x86_64
+?	查看是否删除成功：
+#rpm -qa|grep -i mysql
+删除相关目录
+?	删除老版本mysql相关目录
+命令：
+#rm -fr /usr/lib/mysql
+#rm -fr /usr/include/mysql
+#rm -f /etc/my.cnf
+#rm -rf /usr/share/mysql
+#rm -fr /var/lib/mysql
+?	确认是否删除完成
+#find / -name mysql
+mysql安装
+服务端安装
+切换到附件目录,并安装
+#cd /home/hadoop/installTools
+#rpm -ivh   MySQL-server-5.5.28-1.linux2.6.x86_64.rpm
+Preparing...                ########################################### [100%]
+   1:MySQL-server           ########################################### [100%]
+
+PLEASE REMEMBER TO SET A PASSWORD FOR THE MySQL root USER !
+To do so, start the server, then issue the following commands:
+
+/usr/bin/mysqladmin -u root password 'new-password'
+/usr/bin/mysqladmin -u root -h hdp-m1 password 'new-password'
+
+Alternatively you can run:
+/usr/bin/mysql_secure_installation
+
+which will also give you the option of removing the test
+databases and anonymous user created by default.  This is
+strongly recommended for production servers.
+
+See the manual for more instructions.
+
+Please report any problems with the /usr/bin/mysqlbug script!
+客户端安装
+切换到附件目录,并安装
+#cd /home/hadoop/installTools
+#rpm -ivh  MySQL-client-5.5.28-1.linux2.6.x86_64.rpm
+配置mysql
+?	设置服务为开机自启动：
+#chkconfig mysql on
+?	开启服务：
+#service mysql start
+?	设置root密码并赋权
+#mysql -u root mysql 
+mysql> set PASSWORD = PASSWORD('123456');
+提示成功
+mysql> grant all on *.* to root@'%' identified by '123456';
+		提示成功
+mysql> flush privileges;
+提示成功	
+?	创建hive用户以及赋权
+连接mysql执行下面sql
+#mysql -u root  -p 
+Enter password:
+执行以下命令
+grant all privileges on *.* to 'hive'@'%' identified by 'hive' with grant option; 
+grant all privileges on *.* to 'hive'@'localhost' identified by 'hive' with grant option; 
+grant all privileges on *.* to 'hive'@'hyname02' identified by 'hive' with grant option; 
+grant all privileges on *.* to 'hive'@'hyname01' identified by 'hive' with grant option; 
+flush privileges;
+?	创建ambari用户以及赋权
+grant all privileges on *.* to 'ambari'@'%' identified by 'ambari' with grant option; 
+grant all privileges on *.* to 'ambari'@'localhost' identified by 'ambari' with grant option; 
+grant all privileges on *.* to 'ambari'@'hyname02' identified by 'ambari' with grant option; 
+grant all privileges on *.* to 'ambari'@'hyname01' identified by 'ambari' with grant option; 
+flush privileges;
+?	创建bigdata用户以及赋权
+grant all privileges on *.* to 'bigdata'@'%' identified by 'bigdata' with grant option; 
+grant all privileges on *.* to 'bigdata'@'localhost' identified by 'bigdata' with grant option; 
+grant all privileges on *.* to 'bigdata'@'hyname02' identified by 'bigdata' with grant option; 
+grant all privileges on *.* to 'bigdata'@'hyname01' identified by 'bigdata' with grant option; 
+
+flush privileges;
+退出：exit;
+测试用户是否可用
+#mysql -u ambari -p
+输入密码ambari
+连接成功表明用户已成功创建
+创建数据库
+?	连接mysql执行下面sql
+#mysql -u root  -p 
+Enter password:
+执行下面命令
+create database ambari default charset='UTF8';
+create database hive default charset='UTF8';
+修改mysql用户密码（可选）
+1)	使用root用户登录
+2)	执行passwd mysql
+3)	两次输入新密码123456
+
+修改数据存放目录
+开启mysql增量备份
+root用户下面执行如下命令
+#cp /usr/share/mysql/my-medium.cnf  /etc/my.cnf
+?	编辑my.cnf文件，执行命令（可选）
+vi /etc/my.cnf
+在[mysqld]标签下，增加一行expire_logs_days=7，意思为只保存最近7天的操作日志
+保存退出
+?	重启mysql服务，执行命令：service mysql restart重启mysql服务
+执行命令：mysql -uroot -p登录mysql
+通过show variables like 'log_%';该语句可以查看binlog是否启动
+ 
+
+创建数据存放目录
+关闭数据库，准备修改数据存放目录
+#service mysql stop
+# mkdir /data
+# chown -R mysql:mysql /data/
+复制mysql数据文件
+#cd /grid/0/mysql
+# cp -ar /var/lib/mysql /grid/0/mysql
+修改配置文件
+?	修改数据库参数文件
+#vi /etc/my.cnf
+修改后内容如下：
+# The following options will be passed to all MySQL clients
+[client]
+#password       = your_password
+port            = 3306
+#socket         = /var/lib/mysql/mysql.sock
+socket         = /grid/0/mysql/mysql.sock
+
+# Here follows entries for some specific programs
+
+# The MySQL server
+[mysqld]
+port            = 3306
+#socket         = /var/lib/mysql/mysql.sock
+socket         = /grid/0/mysql/mysql.sock
+datadir       = /grid/0/mysql
+退出后保存
+
+?	修改数据库启动文件
+# vi   /etc/rc.d/init.d/mysql
+修改后内容如下：
+If you change base dir, you must also change datadir. These may get
+# overwritten by settings in the MySQL configuration files.
+
+basedir=
+datadir= /grid/0/mysql
+
+# Default value, in seconds, afterwhich the script should timeout waiting
+# for server start.
+# Value here is overriden by value in my.cnf.
+# 0 means don't wait at all
+# Negative numbers mean to wait indefinitely
+service_startup_timeout=900
+
+# Lock directory for RedHat / SuSE.
+lockdir='/var/lock/subsys'
+lock_file_path="$lockdir/mysql"
+
+# The following variables are only set for letting mysql.server find things.
+
+# Set some defaults
+mysqld_pid_file_path=
+if test -z "$basedir"
+then
+  basedir=/usr
+  bindir=/usr/bin
+  if test -z "$datadir"
+  then
+#    datadir=/var/lib/mysql
+     datadir= /grid/0/mysql
+退出后保存
+?	启动数据库查看配置
+#service mysql start
+#mysql -u root -p
+Enter password:mysql> show variables like '%dir%';
++-----------------------------------------+----------------------------+
+| Variable_name                           | Value                      |
++-----------------------------------------+----------------------------+
+| basedir                                 | /usr                       |
+| binlog_direct_non_transactional_updates | OFF                        |
+| character_sets_dir                      | /usr/share/mysql/charsets/ |
+| datadir                                 | /grid/0/mysql               |
+| innodb_data_home_dir                    |                            |
+| innodb_log_group_home_dir               | ./                         |
+| innodb_max_dirty_pages_pct              | 75                         |
+| lc_messages_dir                         | /usr/share/mysql/          |
+| plugin_dir                              | /usr/lib64/mysql/plugin/   |
+| slave_load_tmpdir                       | /tmp                       |
+| tmpdir                                  | /tmp                       |
++-----------------------------------------+----------------------------+
+11 rows in set (0.00 sec)
+hadoop用户互信配置
+为了便于将备份文件由hyname02同步至hyname01上，需要开启ssh免密码登录
+使用hadoop用户登录hyname02
+#ssh-keygen -t rsa
+#cat /home/hadoop/.ssh/id_rsa.pub >> /home/hadoop/.ssh/authorized_keys
+#ssh-copy-id -i id_rsa.pub hadoop@hyname01（将公匙copy到hyname01上）
+#ssh hyname01（测试SSH无密码登入是否成功）
+
+
+
+
+
+
+内外链接
+首先my sql 不支持oracle的(+) 
+
+内连接: 只连接匹配的行
+左外连接: 包含左边表的全部行（不管右边的表中是否存在与它们匹配的行），以及右边表中全部匹配的行
+右外连接: 包含右边表的全部行（不管左边的表中是否存在与它们匹配的行），以及左边表中全部匹配的行
+全外连接: 包含左、右两个表的全部行，不管另外一边的表中是否存在与它们匹配的行。
+交叉连接  生成笛卡尔积－它不使用任何匹配或者选取条件，而是直接将一个数据源中的每个行与另一个数据源的每个行都一一匹配
+
+举个例子吧。
+表A
+id   name 
+1    张
+2    李
+3    王
+
+表B
+id   address   A_id
+1    北京      1
+2    上海      3
+3    南京      10
+
+包容性:A表包容B表,左连接左表是全的.(left join 或 left outer join )
+SQL语句如下：
+SELECT A.name, B.address
+FROM A
+LEFT JOIN B ON A.id = B.A_id
+查询结果为：
+name     address
+张     北京
+李     NULL
+王     上海
+
+包容性:B表包容A表,右连接右表是全的.(right join 或 right outer join )
+SQL语句如下：
+SELECT A.name, B.address
+FROM A
+RIGHT JOIN B ON A.id = B.A_id
+查询结果为：
+name     address
+张     北京
+王     上海
+NULL     南京
+
+排他性:A,B表中至少有1个匹配时，才返回行。两表的交集
+SQL语句如下：
+select A.name,B.address from A
+inner join B
+on A.id = B.A_id
+
+查询结果为：
+name     address
+张     北京
+王     上海
+inner join  内连接等价于下面的sql:
+SELECT A.name, B.address
+FROM A, B
+WHERE A.id = B.A_id
+
+注释:全外连接返回参与连接的两个数据集合中的全部数据，无论它们是否具有与之相匹配的行。在功能上，它等价于
+
+对这两个数据集合分别进行左外连接和右外连接，然后再使用消去重复行的并操作将上述两个结果集合并为一个结果集
+
+。(full join 或 full outer join )
+SQL语句如下：
+select * from A
+full join B
+查询结果为：
+id     name     id     address A_id
+1     张     1     北京     1
+2     李     1     北京     1
+3     王     1     北京     1
+1     张     2     上海     3
+2     李     2     上海     3
+3     王     2     上海     3
+1     张     3     南京     10
+2     李     3     南京     10
+3     王     3     南京     10
+
+注释：返回3*3=9条记录，即笛卡尔积
+SQL语句如下：
+SELECT * FROM A
+CROSS JOIN B
+查询结果为：
+id     name     id     address A_id
+1     张     1     北京     1
+2     李     1     北京     1
+3     王     1     北京     1
+1     张     2     上海     3
+2     李     2     上海     3
+3     王     2     上海     3
+1     张     3     南京     10
+2     李     3     南京     10
+3     王     3     南京     10
+CROSS JOIN等价于:
+select * from A,B
+
+注意:
+1. on A.id = B.id 等同于 using(id)//这里字段名要相同
+2. 当 MySQL 在从一个表中检索信息时，你可以提示它选择了哪一个索引。  
+如果 EXPLAIN 显示 MySQL 使用了可能的索引列表中错误的索引，这个特性将是很有用的。  
+通过指定 USE INDEX (key_list)，你可以告诉 MySQL 使用可能的索引中最合适的一个索引在表中查找记录行。  
+可选的二选一句法 IGNORE INDEX (key_list) 可被用于告诉 MySQL 不使用特定的索引。    
+
+效率问题:
+1.inner join比left join快
+注:inner join  内连接等价于下面的sql: SELECT A.name, B.address FROM A, B WHERE A.id = B.A_id
+所以一般要用一般的连接就可以了.
+2.连接字段建索引
+
+
+
+
+多表外连接
+select   A.*,B.f1,B.f2,B.fn,C.f1,C.f2,C.fn   from   A    
+  left   join   B   on   A.id=B.id    
+  left   join   C   on   C.id=A.id  
+  where .......
+
