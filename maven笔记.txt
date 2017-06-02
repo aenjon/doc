@@ -88,9 +88,20 @@ deploy             将最终的包复制到远程仓库，与其它开发者和项目共享。
 
 创建Maven项目: mvn archetype:generate
 
-项目打包  mvn package
 
-编译源程序  mvn compile
+
+编译源程序:  mvn compile
+This will run Maven, telling it to execute the compile goal. When it’s finished, you should find the compiled .class files in the target/classes directory.
+
+项目打包:  mvn package
+The package goal will compile your Java code, run any tests, and finish by packaging the code up in a JAR file within the target directory. 
+The name of the JAR file will be based on the project’s <artifactId> and <version>. 
+If you’ve changed the value of <packaging> from "jar" to "war", the result will be a WAR file within the target directory instead of a JAR file.
+ 
+Maven also maintains a repository of dependencies on your local machine (usually in a .m2/repository directory in your home directory) for quick access to project dependencies. 
+If you’d like to install your project’s JAR file to that local repository, then you should invoke the install goal:   mvn install
+The install goal will compile, test, and package your project’s code and then copy it into the local dependency repository, ready for another project to reference it as a dependency.
+ 
  
 编译并测试  mvn test
  
@@ -105,7 +116,6 @@ deploy             将最终的包复制到远程仓库，与其它开发者和项目共享。
 启动tomcat  mvn tomcat:run
  
 启动jetty  mvn jetty:run
-
 
 
 有效pom
@@ -127,6 +137,17 @@ mvn install:install-file -Dfile= -DpomFile=
 如果jar包是通过Maven构建的，它会在目录META-INF的子文件夹下创建一个pom.xml文件，这个Jar包会被默认读取。在这种情况下，你只需要这么做：
 mvn install:install-file -Dfile=
 
+多环境打包：
+开发环境：
+	filter是在maven的compile阶段执行过虑替换的，所以只要触发了编译动作即可，如果像以前一样正常使用发现没有替换，则手工clean一下工程（eclipse -> Project -> Clean）【这里你应该要安装上maven插件，因为替换是maven做的，不是eclipse做的，所以这里的clean应当是触发了maven的compile】，然后在Tomcat上也右键 -> Clean一下即可，然后你去tomcat目录下会发现你的工程的资源文件里面的${key}被替换为对应的config-xx的值了
+	如果上面还不行，那么就使用maven插件或者手工控制台下打maven编译命令吧
+	因为pom.xml中设置了dev为默认激活的，所以默认会把config-dev拿来进行替换${key}
+测试环境
+	手工编译，打包：maven clean install -Ptest		-- 激活id="test"的profile
+生产环境
+	手工编译，打包：maven clean install -Pproduct		-- 激活id="product"的profile
+
+
 
 
 你可以向mvn命令传入多个参数，执行多个构建周期或阶段，如：mvn clean install
@@ -139,6 +160,8 @@ mvn install:install-file -Dfile=
 
 撤销部署：  mvn tomcat:undeploy
 
+mvn spring-boot:run
+
 启动web应用：  mvn tomcat:start
  
 停止web应用：  mvn tomcat:stop
@@ -147,7 +170,7 @@ mvn install:install-file -Dfile=
  
 部署展开的war文件：  mvn war:exploded tomcat:exploded
 
-缺省依赖  mvn dependency:tree
+加载缺省依赖包：  mvn dependency:tree
 
 http://elim.iteye.com/blog/1827778
 

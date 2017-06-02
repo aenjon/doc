@@ -12,6 +12,7 @@
 11，LIMIT：取出指定行的记录，产生虚拟表VT11, 并将结果返回。
 
 
+-------------------------------------注释相关  comment-----------------------------------------
 查询注释：
 SELECT
     COLUMN_NAME,
@@ -22,11 +23,28 @@ WHERE
     table_name='a_user_product_audit'
 AND table_schema='ma';
 
+ 
+ALTER table table_name MODIFY `column_name` datetime DEFAULT NULL COMMENT '这是字段的注释' 
+ALTER TABLE `student` MODIFY COLUMN `id` COMMENT '学号';
+ALTER TABLE t1 MODIFY col1 BIGINT UNSIGNED DEFAULT 1 COMMENT 'my column';
 
-update q_questionnaire_manual set release_at=now() where release_at is null;
+If you want to add/replace the comment on the table itself, use:
+
+ALTER TABLE t comment='foo bar';
+ALTER TABLE table_name COMMENT '这是表的注释'; 
+
+
+-- 查询表字段的注释信息
+SHOW FULL COLUMNS  FROM ma.`s_reject_reason`;
 
 alter table q_questionnaire_manual modify column release_at timestamp not NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'release time from redis';
+ALTER TABLE t1 MODIFY col1 BIGINT UNSIGNED DEFAULT 1 COMMENT 'my column';
 
+
+
+
+
+-------------------------------------修改表结构-----------------------------------------
 alter table 表名 modify column 字段名 类型;
 例如
 MySQL> alter table address modify column city char(30);
@@ -701,6 +719,9 @@ mysql> select now();
 mysql> select now() + 0;    
 　　-> 19971215235026    
  
+update q_questionnaire_manual set release_at=now() where release_at is null; 
+ 
+ 
 unix_timestamp()    
 unix_timestamp(date)    
 返回一个unix时间戳(从'1970-01-01 00:00:00'gmt开始的秒
@@ -1052,6 +1073,8 @@ CREATE TABLE
     )
     ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户角色关联表';
 insert into sys_userrole_rel (user_id，role_id) values ('creditquery'，'CREDIT_QUERY');
+
+
 
 连接数据库：mysql -uUSERNAME -pPassword;
 查看数据库：show databases;

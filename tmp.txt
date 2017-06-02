@@ -1,7 +1,125 @@
+陶绍杰 6-1 11:01
+config.c3p0.url.rpt=221.228.75.176:6000/xinyongjin
+config.c3p0.user.rpt=xinyongjin_test
+config.c3p0.password.rpt=eGlueW9uZ2ppbl90ZXN0Cg==
+陶绍杰 6-1 11:01
+无锡测试库
+
+
+测试相关地址
+
+=======================================================================
+
+电核：http://172.16.20.73:28180/tel-questionnaire/
+账号：test
+密码：123456
+
+管理工具：http://172.16.20.73:28380/mc/login
+账号：test
+密码：123456
+
+PC官网：http://172.16.20.73:28380/pc-website/
+
+dubbo-consumer：http://172.16.20.73:28180/dubbo-consumer/
+
+zookeeper：zookeeper://172.16.20.73:2181
+
+注册中心：http://172.16.20.74:1111/eureka/
+			http://172.16.23.163:1111/eureka/
+
+rocketMQ：172.16.20.72:9876
+
+cp.cm：http://172.16.20.73:28380/cp-cm
+cp.dkw：http://172.16.20.73:28380/cp-dkw
+cp.promoter：http://172.16.20.73:28380/cp-promoter
+cp.promotion.ios：http://172.16.20.73:28380/cp-promotion-ios
+
+
+
+redis.hostName: 172.16.20.205
+redis.port: 19000
+
+核心host: http://221.228.75.188/hexin-service/
+
+url.platform.survey.generate : http://172.16.20.73:28180/dubbo-consumer/tel/generate
+
+mongodb://xinyongjin:eGlueW9uZ2ppbgo=@172.16.20.72:27017,172.16.20.69:27017,172.16.20.205:27017/xinyongjin
+
+openAccountSuccessNotificationUrl : http://172.16.23.120:28380/ao/open
+applyOpenAccountNotificationUrl : http://172.16.23.120:28380/ao/apply
+makeDeliveryNotification : http://172.16.23.120:28380/ao/send
+  
+fdfs: 172.16.20.69:22122
+
+url.survey.bosh.submit=http://172.16.20.73:28180/dubbo-consumer/tel/check
+survey.url=http://test-www.ezloan.cn/survey/surveyHome?token=
+backend.survey.url=http://test-www.ezloan.cn/survey/backend/surveyHome?token=
+url.platform.survey.startDo=http://172.16.20.73:28180/dubbo-consumer/tel/start                                                                                                                                                                                                
+carrierOperator.url=http://test-m.ezloan.cn/mobileOperator/author?token=
+
+url.promoteChannelUrl=http://172.16.20.73:28380/cp-dkw/iam/register
+url.sendDeviceUrl=http://172.16.20.73:28380/cp-dkw/iam/active
+
+
+清理文档  C:\Users\hanjy\Documents\WXWork
+
+180.101.195.217:21
+chonggou
+Y2hvbmdnb3VAMjM0NS5jb20K
+
+
+调用微服务的示例已经完成，放在mc的master分支上，类名：CustomerAccountStatusServiceImpl，方法名：queryCustomerAccountBOCStatus
+
+微服务调用工具整合注意点
+
+1. pom文件中添加依赖（注意版本）
+
+<dependency>
+ <groupId>com.fasterxml.jackson.core</groupId>
+ <artifactId>jackson-annotations</artifactId>
+ <version>2.7.5</version>
+</dependency>
+
+<dependency>
+ <groupId>org.common.spring.eureka</groupId>
+ <artifactId>RibbonClient</artifactId>
+ <version>0.0.1-SNAPSHOT</version>
+ <exclusions>
+  <exclusion>
+   <groupId>org.apache.tomcat.embed</groupId>
+   <artifactId>tomcat-embed-el</artifactId>
+  </exclusion>
+ </exclusions>
+</dependency>
+
+2. 添加eureka配置文件
+
+文件名必须是：eureka-client.properties
+文件内容格式必须是：
+eureka.region=default
+eureka.name=sampleEurekaClient
+eureka.preferSameZone=true
+eureka.shouldUseDns=false
+eureka.serviceUrl.default=http://172.16.23.22:1111/eureka/
+
+
+3. tomcat的版本必须是8
+
+
+徐彤老师
+链接：https://pan.baidu.com/s/1jIAxmAU 密码：16wr
+
+
+
+
+配置过了 zuul 路由信息后 http://172.16.23.22:18080/refreshRoute 用这个刷新
+
 http://localhost:8089/ma/init?adminId=0
 http://localhost:8089/ma/getApplying?adminId=0
 http://localhost:8089/ma/cancelClaimed?adminId=0
 http://localhost:8089/ma/giveUp?adminId=0&applyId=0&claimTime=0&displayTime=0&spendTime=0
+电核系统重置审核员状态：
+http://test-manager.ezloan.cn/tel-questionnaire/sayFree?exten=856
 
 
 
@@ -141,3 +259,15 @@ http://bxpy.12333sh.gov.cn/hdpy/Main/Jbjd.aspx
 
 浦东新区劳动人事争议仲裁委员会	浦建路1619号（近龙阳路）	68812333转1151、1152	201204	周一至周五9:00-11:30  
 北京知达客信息技术有限公司上海分公司：上海市黄浦区圆明园路149号哈密大厦5楼
+
+
+/**
+  * 实例化RestTemplate，通过@LoadBalanced注解开启均衡负载能力.
+  * 
+  * @return restTemplate
+  */
+ @Bean
+ @LoadBalanced
+ public RestTemplate restTemplate() {
+  return new RestTemplate();
+ }

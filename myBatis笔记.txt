@@ -208,6 +208,13 @@ Multi-db vendor support
 动态 SQL 中可插拔的脚本语言
 MyBatis 从 3.2 开始支持可插拔的脚本语言，因此你可以在插入一种语言的驱动（language driver）之后来写基于这种语言的动态 SQL 查询。
 
+
+返回主键
+<!-- useGeneratedKeys="true"把新增加的主键赋值到自己定义的keyProperty（id）中 -->
+<insert id="insertAndGetId" useGeneratedKeys="true" keyProperty="id" parameterType="com.daikuan.iam.pojo.User">
+useGeneratedKeys 取值范围true|false 默认值是：false。 含义：设置是否使用JDBC的getGenereatedKeys方法获取主键并赋值到keyProperty设置的领域模型属性中。
+useGeneratedKeys 要求数据库本身具备主键自动增长的功能，比如说，mysql
+
 可以通过实现下面接口的方式来插入一种语言：
 
 public interface LanguageDriver {
@@ -239,3 +246,57 @@ public interface Mapper {
 
 你前面看到的所有 xml 标签都是默认 MyBatis 语言提供的，它是由别名为 xml 语言驱动器 org.apache.ibatis.scripting.xmltags.XmlLanguageDriver 驱动的。
 
+
+
+
+
+
+mybatis 的条件查询的三个方法实现
+第一种方法 传递map 型，
+<selectid="findTeacherByPage"resultMap="upervisorResultMap" parameterType="java.util.Map">
+	select * from teacher where title like #{title} order by ${sort} ${dir} limit #{start},#{limit}  
+</select>
+
+第二种方法 传递pojo 
+<select id="findItemsList" parameterType="cn.hpu.ssm.po.ItemsQueryVo"  resultType="cn.hpu.ssm.po.ItemsCustom">
+
+带三种方法 多个参数如果不封装成Map，就用序列号代替。
+<select id="login"parameterType="String" resultType="cn.hpu.back.po.Users">
+ SELECT *  FROM users WHERE userphone= #{0} AND userpass=#{1}
+</select>
+
+
+
+
+
+
+
+
+
+
+
+
+java.sql.Types	Java 类型
+BIGINT			java.lang.long
+BINARY			byte[]
+BIT				java.lang.Boolean
+BLOB			byte[]
+CHAR			java.lang.String
+CLOB			java.lang.String
+DATE			java.sql.Date
+DECIMAL			java.math.BigDecimal
+DOUBLE			java.lang.Double
+FLOAT			java.lang.Double
+INTEGER			java.lang.Integer
+JAVA_OBJECT		java.lang.Object
+LONGVARBINARY	byte[]
+LONGVARCHAR		java.lang.String
+NUMERIC	j		ava.math.BigDecimal
+OTHER			java.lang.Object
+REAL			java.lang.Float
+SMALLINT		java.lang.Integer
+TIME			java.sql.Time
+TIMESTAMP		java.sql.Timestamp
+TINYINT			java.lang.Bute
+VARBINARY		byte[]
+VARCHAR			java.lang.String
