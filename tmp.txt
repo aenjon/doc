@@ -1,9 +1,30 @@
-陶绍杰 6-1 11:01
+张凌 6-20 11:49
+https://github.com/codecentric/spring-boot-admin
+张凌 6-20 11:49
+http://chonggou.ezloan.cn:8080/#/
+张凌 6-20 11:49
+https://chonggou.ezloan.cn/eureka/
+张凌 6-20 11:49
+http://kibana.2345.com/#/discover?_g=()&_a=(columns:!(_source),index:'hexin-crontab-async-business-*',interval:auto,query:(query_string:(analyze_wildcard:!t,query:'*')),sort:!('@timestamp',desc))
+张凌 6-20 11:58
+2345com
+（）1234qwer
+
+
+172.16.23.173：3306 root 没有秘密
+CGLIB 代理
+
+cp.cm：http://172.16.20.188:8081/cp-cm（域名访问：https://chonggou.ezloan.cn/cp-cm）
+cp.dkw：http://172.16.20.188:8081/cp-dkw（域名访问：https://chonggou.ezloan.cn/cp-dkw）
+cp.promoter：http://172.16.20.188:8081/cp-promoter（域名访问：https://chonggou.ezloan.cn/cp-promoter/spread/m-index.html）
+cp.promotion.ios：http://172.16.20.188:8081/cp-promotion-ios（域名访问：https://chonggou.ezloan.cn/cp-promotion-ios）
+
+
+信用金无锡测试库
 config.c3p0.url.rpt=221.228.75.176:6000/xinyongjin
 config.c3p0.user.rpt=xinyongjin_test
 config.c3p0.password.rpt=eGlueW9uZ2ppbl90ZXN0Cg==
-陶绍杰 6-1 11:01
-无锡测试库
+
 
 
 测试相关地址
@@ -51,11 +72,6 @@ makeDeliveryNotification : http://172.16.23.120:28380/ao/send
   
 fdfs: 172.16.20.69:22122
 
-url.survey.bosh.submit=http://172.16.20.73:28180/dubbo-consumer/tel/check
-survey.url=http://test-www.ezloan.cn/survey/surveyHome?token=
-backend.survey.url=http://test-www.ezloan.cn/survey/backend/surveyHome?token=
-url.platform.survey.startDo=http://172.16.20.73:28180/dubbo-consumer/tel/start                                                                                                                                                                                                
-carrierOperator.url=http://test-m.ezloan.cn/mobileOperator/author?token=
 
 url.promoteChannelUrl=http://172.16.20.73:28380/cp-dkw/iam/register
 url.sendDeviceUrl=http://172.16.20.73:28380/cp-dkw/iam/active
@@ -68,59 +84,13 @@ chonggou
 Y2hvbmdnb3VAMjM0NS5jb20K
 
 
-调用微服务的示例已经完成，放在mc的master分支上，类名：CustomerAccountStatusServiceImpl，方法名：queryCustomerAccountBOCStatus
 
-微服务调用工具整合注意点
-
-1. pom文件中添加依赖（注意版本）
-
-<dependency>
- <groupId>com.fasterxml.jackson.core</groupId>
- <artifactId>jackson-annotations</artifactId>
- <version>2.7.5</version>
-</dependency>
-
-<dependency>
- <groupId>org.common.spring.eureka</groupId>
- <artifactId>RibbonClient</artifactId>
- <version>0.0.1-SNAPSHOT</version>
- <exclusions>
-  <exclusion>
-   <groupId>org.apache.tomcat.embed</groupId>
-   <artifactId>tomcat-embed-el</artifactId>
-  </exclusion>
- </exclusions>
-</dependency>
-
-2. 添加eureka配置文件
-
-文件名必须是：eureka-client.properties
-文件内容格式必须是：
-eureka.region=default
-eureka.name=sampleEurekaClient
-eureka.preferSameZone=true
-eureka.shouldUseDns=false
-eureka.serviceUrl.default=http://172.16.23.22:1111/eureka/
-
-
-3. tomcat的版本必须是8
-
-
-徐彤老师
 链接：https://pan.baidu.com/s/1jIAxmAU 密码：16wr
 
 
 
 
 配置过了 zuul 路由信息后 http://172.16.23.22:18080/refreshRoute 用这个刷新
-
-http://localhost:8089/ma/init?adminId=0
-http://localhost:8089/ma/getApplying?adminId=0
-http://localhost:8089/ma/cancelClaimed?adminId=0
-http://localhost:8089/ma/giveUp?adminId=0&applyId=0&claimTime=0&displayTime=0&spendTime=0
-电核系统重置审核员状态：
-http://test-manager.ezloan.cn/tel-questionnaire/sayFree?exten=856
-
 
 
 mysql:172.16.23.57:3306
@@ -252,14 +222,6 @@ https://meican.com/login
 
 http://www.12333sh.gov.cn/wszx/ldjcjb.shtml
 http://bxpy.12333sh.gov.cn/hdpy/Main/Jbjd.aspx
-您的姓名： 韩军营  身份证号： 410782198610242812   
-联系电话： 18217006685   地址：   
-区县： 浦东 						编号： 5979609580 		http://www.12333sh.gov.cn/201412333/hdpy/fk/ny/index.shtml#
-咨询内容： 我去年4月份和北京知达客科技技术有限公司签订劳动合同，被外派到上海建设银行工作。到了去年12月底，建设银行项目结束，公司要我在家（上海）等待安排。中间安排过一次到其他项目的面试，但是没有通过。到了今年1月18号，公司仍没有合适的安排，我就和公司商议提交了离职申请并通过。但是1月份的工资公司至今没发，说是没有考勤没有工资。所以我想咨询一下公司的做法合法吗？ 
-
-浦东新区劳动人事争议仲裁委员会	浦建路1619号（近龙阳路）	68812333转1151、1152	201204	周一至周五9:00-11:30  
-北京知达客信息技术有限公司上海分公司：上海市黄浦区圆明园路149号哈密大厦5楼
-
 
 /**
   * 实例化RestTemplate，通过@LoadBalanced注解开启均衡负载能力.
@@ -271,3 +233,35 @@ http://bxpy.12333sh.gov.cn/hdpy/Main/Jbjd.aspx
  public RestTemplate restTemplate() {
   return new RestTemplate();
  }
+ 
+ 
+ CREATE TABLE
+    s_app_load_resource
+    (
+        id bigint NOT NULL AUTO_INCREMENT,
+        type INT COMMENT '类型：如免责声明\平台介绍\banner图片等',
+        app_version VARCHAR(20) COMMENT 'APP版本',
+        device_type INT COMMENT '设备类型，如android、IOS',
+        file_name VARCHAR(100) COMMENT '文件名',
+        dfs_path VARCHAR(256) NOT NULL COMMENT 'fast dfs full path',
+        status TINYINT(1) DEFAULT true NOT NULL COMMENT '状态',
+        extend_id bigint COMMENT '扩展属性ID',
+        valid_at TIMESTAMP COMMENT '生效时间',
+        invalid_at TIMESTAMP COMMENT '失效时间',
+        update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
+        PRIMARY KEY (id)
+    )
+    ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='APP加载资源表';
+--------------------------
+CREATE TABLE
+    s_resource_extend_property
+    (
+        id bigint NOT NULL AUTO_INCREMENT,
+        view_type TINYINT COMMENT '打开视图的类型：如native、browser...',
+        view_uri VARCHAR(200) COMMENT '打开视图资源的定位',
+        need_login TINYINT(1) DEFAULT false COMMENT '是否需要登录 1需要 ',
+        sort not null default 0 INT COMMENT '排序',
+        tag VARCHAR(20) COMMENT '标签,如已开户用户',
+        PRIMARY KEY (id)
+    )
+    ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='资源扩展属性表';
