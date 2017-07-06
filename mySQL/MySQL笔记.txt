@@ -1197,61 +1197,7 @@ USAGE: 只允许登录--其它什么也不允许做。
 
 
 
------------------------------------------------MYSQL数据库备份与恢复---------------------------------------------
-mysqldump -h主机名  -P端口 -u用户名 -p密码 (–database) 数据库名 > 文件名.sql
 
-备份MySQL数据库的命令
-mysqldump -hhostname -uusername -ppassword databasename > backupfile.sql
-
-备份MySQL数据库为带删除表的格式，能够让该备份覆盖已有数据库而不需要手动删除原有数据库。
-mysqldump -–add-drop-table -uusername -ppassword databasename > backupfile.sql
-
-直接将MySQL数据库压缩备份
-mysqldump -hhostname -uusername -ppassword databasename | gzip > backupfile.sql.gz
-
-备份MySQL数据库某个(些)表
-mysqldump -hhostname -uusername -ppassword databasename specific_table1 specific_table2 > backupfile.sql
-
-同时备份多个MySQL数据库
-mysqldump -hhostname -uusername -ppassword –databases databasename1 databasename2 databasename3 > multibackupfile.sql
-
-仅仅备份数据库结构
-mysqldump –no-data –databases databasename1 databasename2 databasename3 > structurebackupfile.sql
-
-备份服务器上所有数据库
-mysqldump –all-databases > allbackupfile.sql
-
-还原MySQL数据库的命令
-mysql -hhostname -uusername -ppassword databasename < backupfile.sql
-
-还原压缩的MySQL数据库
-gunzip < backupfile.sql.gz | mysql -uusername -ppassword databasename
-
-将数据库转移到新服务器
-mysqldump -uusername -ppassword databasename | mysql –host=*.*.*.* -C databasename
-
-
-JAVA代码调用命令的方法
-Process p = Runtime.getRuntime().exec("cmd /c mysqldump -h127.0.0.1 -P3306 -uroot -p123456  customer > d:/opt/customer/dbback/backupfile-1351022418812.sql");
-
-p.waitFor();// 等待编译结束
-
-int ret = p.exitValue();// 检查返回码，看编译是否出错。
-System.out.println(ret);
-
-
-1.INSERT INTO SELECT语句
-语句形式为： Insert into Table2(field1,field2,...) select value1,value2,... from Table1
-要求目标表Table2必须存在，由于目标表Table2已经存在，所以我们除了插入源表Table1的字段外，还可以插入常量。
-
-INSERT INTO s_user_product_audit_status (id, user_id)  
-SELECT id, user_id FROM s_user_product_audit_status_history limit 100000;
-
-
-2.SELECT INTO FROM语句
-      语句形式为：SELECT vale1, value2 into Table2 from Table1
-      要求目标表Table2不存在，因为在插入时会自动创建表Table2，
-       并将Table1中指定字段数据复制到Table2中。
 ------------------------------------------------------------用户权限配置---------------------------------------------------------------
 创建用户
 命令: CREATE USER 'username'@'host' IDENTIFIED BY 'password';
@@ -2624,29 +2570,12 @@ mysql -uroot -p密码 < c:\school.sql
 五、备份数据库：（命令在DOS的[url=file://\mysql\bin]\mysql\bin[/url]目录下执行
  
 ）
-1.导出整个数据库
-导出文件默认是存在mysqlbin目录下
-mysqldump -u 用户名 -p 数据库名 > 导出的文件名
-mysqldump -u user_name -p123456 database_name > outfile_name.sql
-2.导出一个表
-mysqldump -u 用户名 -p 数据库名 表名> 导出的文件名
-mysqldump -u user_name -p database_name table_name > outfile_name.sql
-3.导出一个数据库结构
-mysqldump -u user_name -p -d –add-drop-table database_name > outfile_name.sql
--d 没有数据 –add-drop-table 在每个create语句之前增加一个drop table
-4.带语言参数导出
-mysqldump -uroot -p –default-character-set=latin1 –set-charset=gbk –skip-opt
+
  
 database_name > outfile_name.sql
 ---------------------------------------------------------------------------------
  
----------
-数据类型 tinyint smallint 没有varchar2，只有char 和varchar 用于存储字符串
- 
--------
-复合类型
-enum 多选一 枚举类型
-set 多选
+
 -------
  
 <=> null安全的等于 regexp或rlike 正则表达式匹配
@@ -2665,7 +2594,13 @@ select now() 不用不全结构 now()当前时间
 decima不写参数时，默认decimal(10,0)
  
 mysql忽略大小写，不敏感 binary 二进制严格匹配 where binary name='zhang'
-insert into test values(),(),()同时插入多行。
+insert into test values(),(),()同时插入多行。如：
+
+INSERT INTO `cp_send` VALUES 
+(14181470,1186569,1,2932692,'2016-04-26 19:04:54','2016-04-26 19:04:54','2016-04-26 19:04:54'),
+(14181553,2334446,1,2932482,'2016-04-26 19:25:50','2016-04-26 19:25:50','2016-04-26 19:25:50'),
+(14206967,131339,1,2942103,'2016-04-27 00:11:09','2016-04-27 00:11:08','2016-04-27 00:11:09');
+
 time 不给定符号时从后往前找，给定时按给的是存储。
 datetime null时为空
 timestamp null时给系统时间 p85

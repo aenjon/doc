@@ -1,4 +1,14 @@
-张凌 6-20 11:49
+无锡环境MC日志（180.101.195.217）
+chonggou_log/chonggou_manager_mc_catalina/172.16.40.217/chonggou_manager_mc_catalina.log
+
+rz -E
+
+陶绍杰 7-4 9:57
+180.101.195.217 5022 biz_data C55DE2E68AA14F4B23528417E9A050FD
+陶绍杰 7-4 9:57
+mycat 连接
+
+
 https://github.com/codecentric/spring-boot-admin
 张凌 6-20 11:49
 http://chonggou.ezloan.cn:8080/#/
@@ -10,6 +20,30 @@ http://kibana.2345.com/#/discover?_g=()&_a=(columns:!(_source),index:'hexin-cron
 2345com
 （）1234qwer
 
+FTP生产：
+21 video_ftp@180.101.195.209 无 user_name:user_resource_read(生产read) user_pass:dXNlcl9yZXNvdXJjZV9yZWFkCg==
+
+无锡环境FAST DFS
+172.16.30.164:22122
+
+172.16.20.188:8081/group1/
+172.16.20.188:8081/group2/
+172.16.20.188:8081/group3/
+这是重构对应的下载的ip
+
+as.jdbc.url=jdbc:mysql://180.101.195.217:6155/db_as?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+as.jdbc.username=chg_as_iam
+as.jdbc.password=Y2hnX2FzX2lhbUAyMzQ1LmNvbQo=
+
+
+http://downloaddaikuan.2345.com/
+ftp.image.host.domain=downloaddaikuan.2345.com
+ftp.image.host=172.16.30.209
+ftp.image.port=21
+ftp.image.username=daikuanwang
+ftp.image.password=daikuanwang
+ftp.image.path=/
+ftp.image.root=/
 
 172.16.23.173：3306 root 没有秘密
 CGLIB 代理

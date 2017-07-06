@@ -1,0 +1,70 @@
+-----------------------------------------------MYSQL数据库备份与恢复---------------------------------------------
+mysqldump -h主机名  -P端口 -u用户名 -p密码 (–database) 数据库名 > 文件名.sql
+
+备份MySQL数据库的命令
+mysqldump -hhostname -uusername -ppassword databasename > backupfile.sql
+
+备份MySQL数据库为带删除表的格式，能够让该备份覆盖已有数据库而不需要手动删除原有数据库。
+mysqldump -–add-drop-table -uusername -ppassword databasename > backupfile.sql
+
+直接将MySQL数据库压缩备份
+mysqldump -hhostname -uusername -ppassword databasename | gzip > backupfile.sql.gz
+
+备份MySQL数据库某个(些)表
+mysqldump -hhostname -uusername -ppassword databasename specific_table1 specific_table2 > backupfile.sql
+mysqldump -h180.101.195.217 -P5003 -udaikuanwang -pZGFpa3VhbndhbmcK xinyongjin s_user_product_audit_status_history > F:/mysql/test/s_user_product_audit_status_history.sql
+
+
+同时备份多个MySQL数据库
+mysqldump -hhostname -uusername -ppassword –databases databasename1 databasename2 databasename3 > multibackupfile.sql
+
+仅仅备份数据库结构
+mysqldump –no-data –databases databasename1 databasename2 databasename3 > structurebackupfile.sql
+
+备份服务器上所有数据库
+mysqldump –all-databases > allbackupfile.sql
+
+还原MySQL数据库的命令
+mysql -hhostname -uusername -ppassword databasename < backupfile.sql
+
+还原压缩的MySQL数据库
+gunzip < backupfile.sql.gz | mysql -uusername -ppassword databasename
+
+将数据库转移到新服务器
+mysqldump -uusername -ppassword databasename | mysql –host=*.*.*.* -C databasename
+
+1.导出整个数据库
+导出文件默认是存在mysqlbin目录下
+mysqldump -u 用户名 -p 数据库名 > 导出的文件名
+mysqldump -u user_name -p123456 database_name > outfile_name.sql
+2.导出一个表
+mysqldump -u 用户名 -p 数据库名 表名> 导出的文件名
+mysqldump -u user_name -p database_name table_name > outfile_name.sql
+3.导出一个数据库结构
+mysqldump -u user_name -p -d –add-drop-table database_name > outfile_name.sql
+-d 没有数据 –add-drop-table 在每个create语句之前增加一个drop table
+4.带语言参数导出
+mysqldump -uroot -p –default-character-set=latin1 –set-charset=gbk –skip-opt
+----------------------------------------------------------------------------------------------------------------------
+
+JAVA代码调用命令的方法
+Process p = Runtime.getRuntime().exec("cmd /c mysqldump -h127.0.0.1 -P3306 -uroot -p123456  customer > d:/opt/customer/dbback/backupfile-1351022418812.sql");
+
+p.waitFor();// 等待编译结束
+
+int ret = p.exitValue();// 检查返回码，看编译是否出错。
+System.out.println(ret);
+
+--------------------------------------------------------------------
+1.INSERT INTO SELECT语句
+语句形式为： Insert into Table2(field1,field2,...) select value1,value2,... from Table1
+要求目标表Table2必须存在，由于目标表Table2已经存在，所以我们除了插入源表Table1的字段外，还可以插入常量。
+
+INSERT INTO s_user_product_audit_status (id, user_id)  
+SELECT id, user_id FROM s_user_product_audit_status_history limit 100000;
+
+
+2.SELECT INTO FROM语句
+      语句形式为：SELECT vale1, value2 into Table2 from Table1
+      要求目标表Table2不存在，因为在插入时会自动创建表Table2，
+       并将Table1中指定字段数据复制到Table2中。
